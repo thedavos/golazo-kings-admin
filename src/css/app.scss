@@ -1,1 +1,8 @@
 // app global css in SCSS form
+.body--dark {
+  --q-primary: #2b2c40;
+}
+
+.body--light {
+  background-color: $white-page;
+}
