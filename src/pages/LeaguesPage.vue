@@ -11,28 +11,28 @@
 
     <!-- Stats Cards -->
     <div class="row q-gutter-md q-mb-lg">
-      <q-card class="col-md-3 col-sm-6 col-xs-12">
+      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
         <q-card-section>
           <div class="text-h6">{{ viewModel.totalLeagues.value }}</div>
           <div class="text-grey-6">Total de Ligas</div>
         </q-card-section>
       </q-card>
 
-      <q-card class="col-md-3 col-sm-6 col-xs-12">
+      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
         <q-card-section>
           <div class="text-h6">{{ viewModel.activeLeagues.value }}</div>
           <div class="text-grey-6">Ligas Activas</div>
         </q-card-section>
       </q-card>
 
-      <q-card class="col-md-3 col-sm-6 col-xs-12">
+      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
         <q-card-section>
           <div class="text-h6">{{ viewModel.visibleLeagues.value }}</div>
           <div class="text-grey-6">Ligas Visibles</div>
         </q-card-section>
       </q-card>
 
-      <q-card class="col-md-3 col-sm-6 col-xs-12">
+      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
         <q-card-section>
           <div class="text-h6">{{ viewModel.countries.value.length }}</div>
           <div class="text-grey-6">Países</div>
@@ -176,29 +176,30 @@
         <!-- Actions column -->
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn
-              color="primary"
-              icon="visibility"
-              size="sm"
-              flat
-              round
-              @click="viewLeague(props.row)"
-            >
-              <q-tooltip>Ver detalles</q-tooltip>
-            </q-btn>
-            <q-btn color="warning" icon="edit" size="sm" flat round @click="editLeague(props.row)">
-              <q-tooltip>Editar</q-tooltip>
-            </q-btn>
-            <q-btn
-              color="negative"
-              icon="delete"
-              size="sm"
-              flat
-              round
-              @click="confirmDelete(props.row)"
-            >
-              <q-tooltip>Eliminar</q-tooltip>
-            </q-btn>
+            <q-btn-dropdown flat dense rounded no-icon-animation dropdown-icon="more_vert">
+              <q-list padding separator>
+                <q-item clickable v-close-popup @click="viewLeague(props.row)">
+                  <q-item-section>
+                    <q-item-label>Ver detalles</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="scrapeLeague(props.row)">
+                  <q-item-section>
+                    <q-item-label>Scraping</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="editLeague(props.row)">
+                  <q-item-section>
+                    <q-item-label>Editar</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="confirmDelete(props.row)">
+                  <q-item-section>
+                    <q-item-label>Eliminar</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-td>
         </template>
       </q-table>
@@ -212,7 +213,6 @@ import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
-// import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 // import type { CreateLeagueDto } from 'src/modules/leagues/dtos/create-league.dto';
 
 const notificationService = useQuasarNotifications();
@@ -334,15 +334,19 @@ const getStatusColor = (status: LeagueStatus): string => {
 };
 
 const viewLeague = (league: League) => {
-  console.log('viewLeague', league);
+  console.log('viewLeague: ', league);
+};
+
+const scrapeLeague = (league: League) => {
+  console.log('scrapeLeague: ', league);
 };
 
 const editLeague = (league: League) => {
-  console.log('editLeague', league);
+  console.log('editLeague: ', league);
 };
 
 const confirmDelete = (league: League) => {
-  console.log('confirmDelete', league);
+  console.log('confirmDelete: ', league);
 };
 
 const toggleActive = async (leagueId: number): Promise<void> => {
