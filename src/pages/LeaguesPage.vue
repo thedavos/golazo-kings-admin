@@ -10,35 +10,13 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="row q-gutter-md q-mb-lg">
-      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
-        <q-card-section>
-          <div class="text-h6">{{ viewModel.totalLeagues.value }}</div>
-          <div class="text-grey-6">Total de Ligas</div>
-        </q-card-section>
-      </q-card>
-
-      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
-        <q-card-section>
-          <div class="text-h6">{{ viewModel.activeLeagues.value }}</div>
-          <div class="text-grey-6">Ligas Activas</div>
-        </q-card-section>
-      </q-card>
-
-      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
-        <q-card-section>
-          <div class="text-h6">{{ viewModel.visibleLeagues.value }}</div>
-          <div class="text-grey-6">Ligas Visibles</div>
-        </q-card-section>
-      </q-card>
-
-      <q-card flat class="col-md-2 col-sm-2 col-xs-12">
-        <q-card-section>
-          <div class="text-h6">{{ viewModel.countries.value.length }}</div>
-          <div class="text-grey-6">Países</div>
-        </q-card-section>
-      </q-card>
-    </div>
+    <LeagueStatCards
+      class="row q-gutter-md q-mb-lg"
+      :total-leagues="viewModel.totalLeagues.value"
+      :active-leagues="viewModel.activeLeagues.value"
+      :visible-leagues="viewModel.visibleLeagues.value"
+      :countries="viewModel.countries.value.length"
+    />
 
     <!-- Filters -->
     <q-card class="q-mb-lg">
@@ -204,6 +182,13 @@
         </template>
       </q-table>
     </q-card>
+
+    <view-league-dialog
+      v-if="leagueToView"
+      :model-value="showDetailsDialog"
+      :view-league="leagueToView"
+      @close="onCloseViewDialog"
+    />
   </q-page>
 </template>
 
@@ -212,40 +197,25 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
+import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 // import type { CreateLeagueDto } from 'src/modules/leagues/dtos/create-league.dto';
+
+import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
+import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
 
 const notificationService = useQuasarNotifications();
 const viewModel = useLeagues(notificationService);
 
 // Dialog states
 const showCreateDialog = ref(false);
-// const showDetailsDialog = ref(false);
-// const showDeleteDialog =
+const showDetailsDialog = ref(false);
+// const showDeleteDialog = ref(false);
 
 // Form state
 // const editingLeague = ref<League | null>(null);
 // const leagueToDelete = ref<League | null>(null);
-
-// Form data
-// const leagueForm = ref<CreateLeagueDto>({
-//   name: '',
-//   slug: '',
-//   abbr: '',
-//   country: '',
-//   city: '',
-//   logoUrl: null,
-//   numberOfTeams: 12,
-//   description: '',
-//   foundationYear: null,
-//   instagramHandle: null,
-//   twitterHandle: null,
-//   website: null,
-//   rules: null,
-//   status: LeagueStatus.DRAFT,
-//   isActive: false,
-//   isVisible: true,
-// });
+const leagueToView = ref<League | null>(null);
 
 // Table columns
 const columns = [
@@ -323,18 +293,9 @@ const activeOptions = [
 ];
 
 // Methods
-const getStatusColor = (status: LeagueStatus): string => {
-  const colors = {
-    [LeagueStatus.DRAFT]: 'grey',
-    [LeagueStatus.ACTIVE]: 'positive',
-    [LeagueStatus.INACTIVE]: 'warning',
-    [LeagueStatus.ARCHIVED]: 'negative',
-  };
-  return colors[status] || 'grey';
-};
-
 const viewLeague = (league: League) => {
-  console.log('viewLeague: ', league);
+  showDetailsDialog.value = true;
+  leagueToView.value = league;
 };
 
 const scrapeLeague = (league: League) => {
@@ -347,6 +308,11 @@ const editLeague = (league: League) => {
 
 const confirmDelete = (league: League) => {
   console.log('confirmDelete: ', league);
+};
+
+const onCloseViewDialog = () => {
+  showDetailsDialog.value = false;
+  leagueToView.value = null;
 };
 
 const toggleActive = async (leagueId: number): Promise<void> => {

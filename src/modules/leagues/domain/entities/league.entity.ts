@@ -64,6 +64,14 @@ export class League {
     return `${this.city}, ${this.country}`;
   }
 
+  get hasLogo(): boolean {
+    return this.logoUrl !== null;
+  }
+
+  get hasSocialMedia(): boolean {
+    return this.twitterHandle !== null || this.instagramHandle !== null;
+  }
+
   hasActiveSeason(): boolean {
     return this.seasons.some((season) => season.isActive);
   }
