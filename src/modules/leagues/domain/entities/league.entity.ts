@@ -1,5 +1,5 @@
 import { Season } from './season.entity';
-import type { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
+import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 
 export class League {
   constructor(
@@ -52,6 +52,10 @@ export class League {
     );
   }
 
+  get isInDraft(): boolean {
+    return this.status === LeagueStatus.DRAFT;
+  }
+
   get isOperational(): boolean {
     return this.isActive && this.isVisible;
   }
@@ -69,7 +73,16 @@ export class League {
   }
 
   get hasSocialMedia(): boolean {
-    return this.twitterHandle !== null || this.instagramHandle !== null;
+    return !!this.twitterHandle || !!this.instagramHandle;
+  }
+
+  get hasWebsite(): boolean {
+    return !!this.website;
+  }
+
+  public getAge(): number | null {
+    if (!this.foundationYear) return null;
+    return new Date().getFullYear() - this.foundationYear;
   }
 
   hasActiveSeason(): boolean {

@@ -112,5 +112,8 @@ const menuLinks = [
   { title: 'Jugadores', icon: 'groups', link: '/players' },
 ];
 
-const secondaryMenuLinks = [{ title: 'Configuración', icon: 'settings', link: '/configuration' }];
+const secondaryMenuLinks = [
+  { title: 'Extracción de datos', icon: 'data_exploration', link: '/scraping' },
+  { title: 'Configuración', icon: 'settings', link: '/configuration' },
+];
 </script>

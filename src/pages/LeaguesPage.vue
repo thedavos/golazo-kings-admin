@@ -161,11 +161,6 @@
                     <q-item-label>Ver detalles</q-item-label>
                   </q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup @click="scrapeLeague(props.row)">
-                  <q-item-section>
-                    <q-item-label>Scraping</q-item-label>
-                  </q-item-section>
-                </q-item>
                 <q-item clickable v-close-popup @click="editLeague(props.row)">
                   <q-item-section>
                     <q-item-label>Editar</q-item-label>
@@ -296,10 +291,6 @@ const activeOptions = [
 const viewLeague = (league: League) => {
   showDetailsDialog.value = true;
   leagueToView.value = league;
-};
-
-const scrapeLeague = (league: League) => {
-  console.log('scrapeLeague: ', league);
 };
 
 const editLeague = (league: League) => {

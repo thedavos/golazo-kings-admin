@@ -4,18 +4,24 @@ import type { ApiResponse } from './response.api';
 export class ApiClient {
   private baseURL = '/api/v1';
 
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, params?: any): Promise<ApiResponse<T>> {
     try {
-      const response = await api.get(`${this.baseURL}${endpoint}`);
+      const response = await api.get(`${this.baseURL}${endpoint}`, {
+        params,
+      });
+
       return response.data;
     } catch (error: any) {
       throw this.handleError(error);
     }
   }
 
-  async post<T>(endpoint: string, data: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data: any, params?: any): Promise<ApiResponse<T>> {
     try {
-      const response = await api.post(`${this.baseURL}${endpoint}`, data);
+      const response = await api.post(`${this.baseURL}${endpoint}`, data, {
+        params,
+      });
+
       return response.data;
     } catch (error: any) {
       throw this.handleError(error);
