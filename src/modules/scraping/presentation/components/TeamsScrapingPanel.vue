@@ -7,6 +7,7 @@
           <div class="col-12 col-md-3">
             <q-select
               v-model="selectedLeague"
+              :options="leagueOptions"
               option-label="name"
               option-value="id"
               label="Filtrar por Liga"
@@ -42,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { League } from 'src/modules/leagues/domain/entities/league.entity';
+import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 
 // Props
 interface Props {
@@ -54,15 +55,15 @@ interface Props {
 const props = defineProps<Props>();
 
 // Emits
-interface Emits {
-  (e: 'refresh'): void;
-  // (e: 'view-team', team: Team): void;
-  // (e: 'edit-team', team: Team): void;
-  // (e: 'delete-team', team: Team): void;
-  // (e: 'scrape-team-players', team: Team): void;
-}
+// interface Emits {
+//   (e: 'refresh'): void;
+// (e: 'view-team', team: Team): void;
+// (e: 'edit-team', team: Team): void;
+// (e: 'delete-team', team: Team): void;
+// (e: 'scrape-team-players', team: Team): void;
+// }
 
-const emit = defineEmits<Emits>();
+// const emit = defineEmits<Emits>();
 
 // Reactive data
 const selectedLeague = ref<number | null>(null);

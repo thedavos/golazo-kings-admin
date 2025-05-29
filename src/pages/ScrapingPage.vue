@@ -9,8 +9,18 @@
         </p>
       </div>
       <div class="q-gutter-sm">
-        <q-btn color="primary" icon="workspaces" label="Scrapear Equipos" />
-        <q-btn color="secondary" icon="person" label="Scrapear Jugadores" />
+        <q-btn
+          color="primary"
+          icon="workspaces"
+          label="Scrapear Equipos"
+          @click="openTeamScrapingDialog"
+        />
+        <q-btn
+          color="secondary"
+          icon="person"
+          label="Scrapear Jugadores"
+          @click="openPlayerScrapingDialog"
+        />
       </div>
     </div>
 
@@ -18,8 +28,9 @@
     <q-card class="q-mb-lg">
       <q-tabs
         dense
+        v-model="activeTab"
         class="text-grey"
-        active-color="primary"
+        active-color="accent"
         indicator-color="primary"
         align="justify"
         narrow-indicator
@@ -29,7 +40,56 @@
         <q-tab name="history" icon="history" label="Historial" />
       </q-tabs>
     </q-card>
+
+    <!-- Dialogs -->
+    <TeamScrapingDialog
+      v-model="showTeamScrapingDialog"
+      :leagues="leagues"
+      @scraping-completed="onTeamScrapingCompleted"
+    />
   </q-page>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+
+// composables
+import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
+import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
+
+// components
+import TeamScrapingDialog from 'src/modules/scraping/presentation/dialogs/TeamScrapingDialog.vue';
+
+const notificationService = useQuasarNotifications();
+const leagueViewModel = useLeagues(notificationService);
+
+// Reactive data
+const activeTab = ref('teams');
+const showTeamScrapingDialog = ref(false);
+const showPlayerScrapingDialog = ref(false);
+
+// Computed
+const leagues = computed(() => leagueViewModel.leagues.value);
+
+// Methods
+const openTeamScrapingDialog = () => {
+  showTeamScrapingDialog.value = true;
+};
+
+const openPlayerScrapingDialog = () => {
+  showPlayerScrapingDialog.value = true;
+};
+
+const onTeamScrapingCompleted = () => {
+  // scrapingViewModel.setLastScrapingResult({
+  //   ...result,
+  //   type: ScrapingType.TEAMS
+  // });
+  // refreshTeamData();
+};
+
+// Lifecycle
+onMounted(async () => {
+  await Promise.all([leagueViewModel.loadLeagues()]);
+});
+</script>
