@@ -269,8 +269,8 @@
               <div v-if="scrapingResult" class="q-mt-lg">
                 <q-card flat bordered>
                   <q-card-section>
-                    <div class="flex flex-row q-gutter-sm justify-start items-center">
-                      <div class="col-md-3 q-mb-md">Resultados del Scraping</div>
+                    <div class="row q-gutter-sm justify-start items-center">
+                      <div class="text-subtitle1 col-12 col-md-auto">Equipos extraídos</div>
                       <q-badge rounded color="info" text-color="white" align="middle">
                         {{ scrapingResult.itemsScraped }} Extraídos
                       </q-badge>
@@ -293,7 +293,6 @@
                       v-if="scrapingResult.scrapedItems && scrapingResult.scrapedItems.length > 0"
                       class="q-mt-lg"
                     >
-                      <div class="text-subtitle1 q-mb-md">Equipos Scrapeados:</div>
                       <q-list bordered separator style="max-height: 300px; overflow-y: auto">
                         <q-item
                           v-for="team in scrapingResult.scrapedItems"
