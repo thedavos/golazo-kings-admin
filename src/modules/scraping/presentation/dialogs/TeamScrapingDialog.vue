@@ -269,44 +269,23 @@
               <div v-if="scrapingResult" class="q-mt-lg">
                 <q-card flat bordered>
                   <q-card-section>
-                    <div class="text-h6 q-mb-md">Resultados del Scraping</div>
+                    <div class="flex flex-row q-gutter-sm justify-start items-center">
+                      <div class="col-md-3 q-mb-md">Resultados del Scraping</div>
+                      <q-badge rounded color="info" text-color="white" align="middle">
+                        {{ scrapingResult.itemsScraped }} Extraídos
+                      </q-badge>
 
-                    <div class="row q-gutter-md">
-                      <div class="col-12 col-md-2">
-                        <q-card class="bg-info text-white">
-                          <q-card-section class="text-center">
-                            <div class="text-h4">{{ scrapingResult.itemsScraped }}</div>
-                            <div class="text-subtitle2">Equipos Scrapeados</div>
-                          </q-card-section>
-                        </q-card>
-                      </div>
+                      <q-badge rounded color="positive" text-color="white" align="middle">
+                        {{ scrapingResult.itemsCreated }} Creados
+                      </q-badge>
 
-                      <div class="col-12 col-md-2">
-                        <q-card class="bg-positive text-white">
-                          <q-card-section class="text-center">
-                            <div class="text-h4">{{ scrapingResult.itemsCreated }}</div>
-                            <div class="text-subtitle2">Equipos Creados</div>
-                          </q-card-section>
-                        </q-card>
-                      </div>
+                      <q-badge rounded color="warning" text-color="white" align="middle">
+                        {{ scrapingResult.itemsUpdated }} Actualizados
+                      </q-badge>
 
-                      <div class="col-12 col-md-2">
-                        <q-card class="bg-warning text-white">
-                          <q-card-section class="text-center">
-                            <div class="text-h4">{{ scrapingResult.itemsUpdated }}</div>
-                            <div class="text-subtitle2">Equipos Actualizados</div>
-                          </q-card-section>
-                        </q-card>
-                      </div>
-
-                      <div class="col-12 col-md-2">
-                        <q-card class="bg-negative text-white">
-                          <q-card-section class="text-center">
-                            <div class="text-h4">{{ scrapingResult.errors.length }}</div>
-                            <div class="text-subtitle2">Errores</div>
-                          </q-card-section>
-                        </q-card>
-                      </div>
+                      <q-badge rounded color="negative" text-color="white" align="middle">
+                        {{ scrapingResult.errors.length }} Errores
+                      </q-badge>
                     </div>
 
                     <!-- Scraped Teams List -->
