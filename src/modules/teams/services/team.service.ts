@@ -28,6 +28,11 @@ export class TeamService {
     return TeamMapper.fromDto(response.data);
   }
 
+  async getTeamBySlug(slug: string): Promise<Team> {
+    const response: ApiResponse<TeamDto> = await this.apiClient.get(`/teams/slug/${slug}`);
+    return TeamMapper.fromDto(response.data);
+  }
+
   async createTeam(team: CreateTeamDto): Promise<Team> {
     const response: ApiResponse<TeamDto> = await this.apiClient.post('/teams', team);
     return TeamMapper.fromDto(response.data);

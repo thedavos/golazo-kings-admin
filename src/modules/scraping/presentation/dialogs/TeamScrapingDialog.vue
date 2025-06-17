@@ -371,7 +371,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useScraping } from 'src/modules/scraping/presentation/composables/useScraping.composable';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 
@@ -391,8 +390,7 @@ interface Emits {
 
 const emit = defineEmits<Emits>();
 
-const notificationService = useQuasarNotifications();
-const scrapingViewModel = useScraping(notificationService);
+const scrapingViewModel = useScraping();
 
 // Reactive data
 const currentStep = ref(1);
@@ -453,8 +451,7 @@ const startScraping = async () => {
     scrapingStatus.value = 'Obteniendo datos de equipos...';
 
     const result = await scrapingViewModel.scrapeTeamsByLeague(
-      selectedLeague.value.slug,
-      selectedLeague.value.id,
+      selectedLeague.value,
       scrapingOptions.value,
     );
 

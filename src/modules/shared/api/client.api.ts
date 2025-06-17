@@ -2,7 +2,7 @@ import { api } from 'boot/axios';
 import type { ApiResponse } from './response.api';
 
 export class ApiClient {
-  private baseURL = '/api/v1';
+  private baseURL = '';
 
   async get<T>(endpoint: string, params?: any): Promise<ApiResponse<T>> {
     try {

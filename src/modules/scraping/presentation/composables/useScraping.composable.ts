@@ -1,11 +1,12 @@
 import { ScrapingViewModel } from 'src/modules/scraping/presentation/viewmodels/scraping.viewmodel';
-import type { UseQuasarNotificationReturn } from 'src/composables/useQuasarNotifications';
+import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 
 let scrapingViewModel: ScrapingViewModel | null = null;
 
-export function useScraping(notifications: UseQuasarNotificationReturn) {
+export function useScraping() {
   if (!scrapingViewModel) {
-    scrapingViewModel = new ScrapingViewModel(notifications);
+    const notificationService = useQuasarNotifications();
+    scrapingViewModel = new ScrapingViewModel(notificationService);
   }
 
   return scrapingViewModel;

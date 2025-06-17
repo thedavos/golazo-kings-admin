@@ -189,7 +189,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
@@ -199,8 +198,7 @@ import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
 import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
 
-const notificationService = useQuasarNotifications();
-const viewModel = useLeagues(notificationService);
+const viewModel = useLeagues();
 
 // Dialog states
 const showCreateDialog = ref(false);

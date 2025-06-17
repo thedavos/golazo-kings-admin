@@ -1,11 +1,12 @@
 import { LeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
-import type { UseQuasarNotificationReturn } from 'src/composables/useQuasarNotifications';
+import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 
 let leagueViewModel: LeagueViewModel | null = null;
 
-export function useLeagues(notifications: UseQuasarNotificationReturn) {
+export function useLeagues() {
   if (!leagueViewModel) {
-    leagueViewModel = new LeagueViewModel(notifications);
+    const notificationService = useQuasarNotifications();
+    leagueViewModel = new LeagueViewModel(notificationService);
   }
 
   return leagueViewModel;

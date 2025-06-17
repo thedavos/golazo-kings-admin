@@ -54,14 +54,12 @@
 import { ref, computed, onMounted } from 'vue';
 
 // composables
-import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
 
 // components
 import TeamScrapingDialog from 'src/modules/scraping/presentation/dialogs/TeamScrapingDialog.vue';
 
-const notificationService = useQuasarNotifications();
-const leagueViewModel = useLeagues(notificationService);
+const leagueViewModel = useLeagues();
 
 // Reactive data
 const activeTab = ref('teams');

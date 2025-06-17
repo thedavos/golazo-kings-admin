@@ -14,6 +14,14 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/teams',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue') },
+    ],
+  },
+
+  {
     path: '/scraping',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/ScrapingPage.vue') }],

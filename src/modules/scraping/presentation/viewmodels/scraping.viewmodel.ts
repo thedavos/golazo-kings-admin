@@ -1,6 +1,8 @@
 import { ref, computed } from 'vue';
 import { ScrapingService } from 'src/modules/scraping/services/scraping.service';
+import { TeamService } from 'src/modules/teams/services/team.service';
 import { ScrapingType } from 'src/modules/scraping/domain/enums/scrapingType.enum';
+import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 import type { ScrapedTeam } from 'src/modules/scraping/domain/entities/scrapedTeam.entity';
 import type {
   ScrapingResult,
@@ -8,6 +10,10 @@ import type {
   TeamScrapingProcessResult,
 } from 'src/modules/scraping/dtos/scrapingResult.dto';
 import type { UseQuasarNotificationReturn } from 'src/composables/useQuasarNotifications';
+import type { Team } from 'src/modules/teams/domain/entities/team.entity';
+import type { TryCatchResult } from 'src/modules/shared/utils/tryCatch.util';
+import { objectComparer } from 'src/modules/shared/utils/objectComparer.util';
+import { tryCatch } from 'src/modules/shared/utils/tryCatch.util';
 
 export interface ScrapingOptions {
   createMissing: boolean;
@@ -18,6 +24,7 @@ export interface ScrapingOptions {
 
 export class ScrapingViewModel {
   private scrapingService: ScrapingService;
+  private teamService: TeamService;
   private notifications: UseQuasarNotificationReturn;
 
   // Reactive state
@@ -32,19 +39,22 @@ export class ScrapingViewModel {
 
   constructor(notifications: UseQuasarNotificationReturn) {
     this.scrapingService = new ScrapingService();
+    this.teamService = new TeamService();
     this.notifications = notifications;
   }
 
   public async scrapeTeamsByLeague(
-    leagueSlug: string,
-    leagueId: number,
+    league: League,
     options: ScrapingOptions,
   ): Promise<TeamScrapingResult> {
     const startTime = Date.now();
     this._scrapingLoading.value = true;
 
     try {
-      const scrapedTeams = await this.scrapingService.getScrapedTeams({ leagueId, leagueSlug });
+      const scrapedTeams = await this.scrapingService.getScrapedTeams({
+        leagueId: league.id,
+        leagueSlug: league.slug,
+      });
 
       const filteredTeams = options.nameFilter
         ? scrapedTeams.filter((team) =>
@@ -52,7 +62,7 @@ export class ScrapingViewModel {
           )
         : scrapedTeams;
 
-      const result = this.processScrapedTeams(filteredTeams, options);
+      const result = await this.processScrapedTeams(filteredTeams, league, options);
       const duration = Date.now() - startTime;
 
       const fullResult: TeamScrapingResult = {
@@ -61,8 +71,8 @@ export class ScrapingViewModel {
         timestamp: new Date(),
         duration,
         details: {
-          leagueName: leagueSlug,
-          leagueId: leagueId,
+          leagueName: league.slug,
+          leagueId: league.id,
         },
       };
 
@@ -87,7 +97,7 @@ export class ScrapingViewModel {
         timestamp: new Date(),
         duration,
         details: {
-          leagueName: leagueSlug,
+          leagueName: league.slug,
         },
       };
 
@@ -99,10 +109,11 @@ export class ScrapingViewModel {
     }
   }
 
-  private processScrapedTeams(
+  private async processScrapedTeams(
     scrapedTeams: ScrapedTeam[],
+    league: League,
     options: ScrapingOptions,
-  ): TeamScrapingProcessResult {
+  ): Promise<TeamScrapingProcessResult> {
     const result = {
       success: true,
       itemsScraped: scrapedTeams.length,
@@ -112,12 +123,104 @@ export class ScrapingViewModel {
       scrapedItems: scrapedTeams,
     };
 
-    for (const scrapedTeam of scrapedTeams) {
-      if (!options.createMissing && !options.updateExisting) continue;
-      console.log('scrapedTeam create', scrapedTeam);
+    if (!options.createMissing && !options.updateExisting) {
+      result.success = true;
+      return result;
     }
 
-    result.success = result.errors.length === 0 || result.itemsCreated + result.itemsUpdated > 0;
+    console.log('options: ', options.createMissing);
+
+    const processingPromises = scrapedTeams.map(async (scrapedTeam) => {
+      const { data: existingTeam } = await this.getTeamByScrapedTeam(scrapedTeam);
+
+      if (existingTeam) {
+        const hasChanges = objectComparer.compare<object>(existingTeam, scrapedTeam).hasChanges;
+        if (options.updateExisting && hasChanges) {
+          const { error: updateTeamErrorMessage } = await this.updateExistingTeam(
+            existingTeam,
+            scrapedTeam,
+            league,
+          );
+
+          if (updateTeamErrorMessage) {
+            return {
+              status: 'error',
+              error: `Error actualizando a ${scrapedTeam.name}: ${updateTeamErrorMessage}`,
+            };
+          }
+
+          return { status: 'updated' };
+        }
+      } else {
+        if (options.createMissing) {
+          const { error: createTeamErrorMessage } = await this.createMissingTeam(
+            scrapedTeam,
+            league,
+          );
+
+          if (createTeamErrorMessage) {
+            return {
+              status: 'error',
+              error: `Error creando a ${scrapedTeam.name}: ${createTeamErrorMessage}`,
+            };
+          }
+
+          return { status: 'created' };
+        }
+      }
+
+      return { status: 'skipped' };
+    });
+
+    const outcomes = await Promise.all(processingPromises);
+
+    for (const outcome of outcomes) {
+      if (outcome.status === 'created') result.itemsCreated++;
+      if (outcome.status === 'updated') result.itemsUpdated++;
+      if (outcome.status === 'error') result.errors.push(outcome.error!);
+    }
+
+    result.success = result.errors.length === 0;
     return result;
+  }
+
+  private async getTeamByScrapedTeam(scrapedTeam: ScrapedTeam): Promise<TryCatchResult<Team>> {
+    return tryCatch(() => this.teamService.getTeamBySlug(scrapedTeam.slug));
+  }
+
+  private async createMissingTeam(
+    scrapedTeam: ScrapedTeam,
+    league: League,
+  ): Promise<TryCatchResult<Team>> {
+    return tryCatch(() =>
+      this.scrapingService.createTeamByScraping({
+        name: scrapedTeam.name,
+        logoUrl: scrapedTeam.logoUrl,
+        slug: scrapedTeam.slug,
+        leagueId: league.id,
+        leagueUuid: league.uuid,
+        country: league.country,
+        city: league.city,
+      }),
+    );
+  }
+
+  private async updateExistingTeam(
+    existingTeam: Team,
+    scrapedTeam: ScrapedTeam,
+    league: League,
+  ): Promise<TryCatchResult<Team>> {
+    return tryCatch(() =>
+      this.scrapingService.updateTeamByScraping({
+        name: scrapedTeam.name,
+        logoUrl: scrapedTeam.logoUrl,
+        slug: scrapedTeam.slug,
+        leagueId: league.id,
+        leagueUuid: league.uuid,
+        country: league.country,
+        city: league.city,
+        uuid: existingTeam.uuid,
+      }),
+    );
   }
 }
