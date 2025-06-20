@@ -161,6 +161,11 @@
                     <q-item-label>Ver detalles</q-item-label>
                   </q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup @click="viewLeagueTeams(props.row)">
+                  <q-item-section>
+                    <q-item-label>Ver equipos</q-item-label>
+                  </q-item-section>
+                </q-item>
                 <q-item clickable v-close-popup @click="editLeague(props.row)">
                   <q-item-section>
                     <q-item-label>Editar</q-item-label>
@@ -189,6 +194,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
@@ -198,6 +204,7 @@ import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
 import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
 
+const router = useRouter();
 const viewModel = useLeagueViewModel();
 
 // Dialog states
@@ -289,6 +296,10 @@ const activeOptions = [
 const viewLeague = (league: League) => {
   showDetailsDialog.value = true;
   leagueToView.value = league;
+};
+
+const viewLeagueTeams = async (league: League) => {
+  await router.push({ name: 'league-teams', params: { leagueId: league.id } });
 };
 
 const editLeague = (league: League) => {

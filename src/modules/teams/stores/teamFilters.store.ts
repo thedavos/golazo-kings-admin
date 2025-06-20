@@ -1,18 +1,20 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
+import type { SelectedItem } from 'src/modules/shared/types/Quasar.types';
+
 export interface TeamFilters {
   search?: string;
-  city?: string;
-  country?: string;
-  leagueId?: number | undefined;
+  city?: SelectedItem | null;
+  country?: SelectedItem | null;
+  leagueId?: number | null;
 }
 
 const DEFAULT_FILTERS: TeamFilters = {
   search: '',
-  city: '',
-  country: '',
-  leagueId: undefined,
+  city: null,
+  country: null,
+  leagueId: null,
 };
 
 export const useTeamFiltersStore = defineStore('teamFilters', () => {
@@ -21,8 +23,8 @@ export const useTeamFiltersStore = defineStore('teamFilters', () => {
   const setFilters = (newFilters: Partial<TeamFilters>): void => {
     const validatedFilters = { ...newFilters };
 
-    if (validatedFilters.leagueId !== undefined && validatedFilters.leagueId < 0) {
-      validatedFilters.leagueId = undefined;
+    if (validatedFilters.leagueId && validatedFilters.leagueId < 0) {
+      validatedFilters.leagueId = null;
     }
 
     if (validatedFilters.search) {

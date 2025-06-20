@@ -14,12 +14,11 @@
         <div class="row q-gutter-md">
           <div class="col-12 col-md-3">
             <q-input
-              v-model="searchText"
+              v-model="filters.search"
               outlined
               dense
               placeholder="Buscar equipos..."
               clearable
-              @update:model-value="updateFilters"
             >
               <template v-slot:prepend>
                 <q-icon name="search" />
@@ -27,33 +26,31 @@
             </q-input>
           </div>
 
-          <div class="col-12 col-md-2">
+          <div v-if="showFilters" class="col-12 col-md-2">
             <q-select
-              v-model="selectedCity"
+              v-model="filters.city"
               :options="cityOptions"
               outlined
               dense
               clearable
               label="Ciudad"
-              @update:model-value="updateFilters"
             />
           </div>
 
-          <div class="col-12 col-md-2">
+          <div v-if="showFilters" class="col-12 col-md-2">
             <q-select
-              v-model="selectedCountry"
+              v-model="filters.country"
               :options="countryOptions"
               outlined
               dense
               clearable
               label="País"
-              @update:model-value="updateFilters"
             />
           </div>
 
-          <div class="col-12 col-md-2">
+          <div v-if="showFilters" class="col-12 col-md-2">
             <q-select
-              v-model="selectedLeague"
+              v-model="filters.leagueId"
               :options="leagueOptions"
               outlined
               dense
@@ -63,7 +60,6 @@
               option-value="id"
               emit-value
               map-options
-              @update:model-value="updateFilters"
             />
           </div>
 
@@ -139,19 +135,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team.viewmodel';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
-import type { SelectedItem } from 'src/modules/shared/types/Quasar.types';
 
 import TeamDetailDialog from 'src/modules/teams/presentation/dialogs/TeamDetailDialog.vue';
 
+const { params } = useRoute();
 const leagueViewModel = useLeagueViewModel();
 const {
   cities,
   countries,
   teams,
   loadings,
+  filters,
   setFilters,
   clearFilters,
   selectedTeam,
@@ -163,10 +161,12 @@ const {
 const showFormDialog = ref(false);
 const showDetailDialog = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
-const searchText = ref('');
-const selectedCity = ref<SelectedItem | null>(null);
-const selectedCountry = ref<SelectedItem | null>(null);
-const selectedLeague = ref<number | null>(null);
+
+if (params.leagueId) {
+  setFilters({
+    leagueId: Number(params.leagueId),
+  });
+}
 
 // Computed
 const cityOptions = computed(() => cities.value.map((city) => ({ label: city, value: city })));
@@ -175,6 +175,7 @@ const countryOptions = computed(() =>
 );
 const leagueOptions = computed(() => leagueViewModel.leagues.value);
 const loading = computed(() => loadings.value.any);
+const showFilters = computed(() => !params.leagueId);
 
 const columns = [
   {
@@ -222,20 +223,7 @@ const columns = [
 ];
 
 // Methods
-function updateFilters() {
-  setFilters({
-    search: searchText.value,
-    city: selectedCity.value?.value || '',
-    country: selectedCountry.value?.value || '',
-    leagueId: Number(selectedLeague.value) || undefined,
-  });
-}
-
 function clearAllFilters() {
-  searchText.value = '';
-  selectedCity.value = null;
-  selectedCountry.value = null;
-  selectedLeague.value = null;
   clearFilters();
 }
 

@@ -4,8 +4,8 @@
     @update:model-value="(val) => emit('update:modelValue', val)"
     persistent
     maximized
-    transition-show="slide-up"
-    transition-hide="slide-down"
+    transition-show="slide-left"
+    transition-hide="slide-right"
   >
     <q-card class="column full-height">
       <q-toolbar class="bg-primary text-white">

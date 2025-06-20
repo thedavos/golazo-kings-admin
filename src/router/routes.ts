@@ -10,14 +10,24 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/leagues',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/LeaguesPage.vue') }],
+    children: [
+      { path: '', component: () => import('pages/LeaguesPage.vue') },
+      {
+        name: 'league-teams',
+        path: ':leagueId/teams',
+        component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
+      },
+    ],
   },
 
   {
     path: '/teams',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue') },
+      {
+        path: '',
+        component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
+      },
     ],
   },
 

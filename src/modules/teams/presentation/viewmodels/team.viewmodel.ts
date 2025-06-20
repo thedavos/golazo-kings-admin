@@ -52,7 +52,7 @@ export function useTeamViewModel() {
 
   return {
     // State
-    filters: readonly(filters),
+    filters,
     teams: readonly(teams),
     cities: readonly(cities),
     countries: readonly(countries),

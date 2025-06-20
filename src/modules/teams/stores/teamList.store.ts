@@ -32,17 +32,17 @@ export const useTeamListStore = defineStore('teamList', () => {
       const searchTerm = teamFilters.search.toLowerCase().trim();
 
       result = result.filter((team) => {
-        const searchableText = `${team.name} ${team.city} ${team.slug}`.toLowerCase();
+        const searchableText = `${team.name} ${team.slug}`.toLowerCase();
         return searchableText.includes(searchTerm);
       });
     }
 
-    if (teamFilters.city?.trim()) {
-      result = result.filter((team) => team.city === teamFilters.city);
+    if (teamFilters.city?.value.trim()) {
+      result = result.filter((team) => team.city === teamFilters.city?.value);
     }
 
-    if (teamFilters.country?.trim()) {
-      result = result.filter((team) => team.country === teamFilters.country);
+    if (teamFilters.country?.value.trim()) {
+      result = result.filter((team) => team.country === teamFilters.country?.value);
     }
 
     if (teamFilters.leagueId) {
