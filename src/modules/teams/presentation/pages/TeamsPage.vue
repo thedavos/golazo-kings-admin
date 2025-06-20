@@ -105,19 +105,35 @@
 
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn flat round dense color="primary" icon="visibility" @click="viewTeam(props.row)">
-              <q-tooltip>Ver detalles</q-tooltip>
-            </q-btn>
-            <q-btn flat round dense color="warning" icon="edit" @click="editTeam(props.row)">
-              <q-tooltip>Editar</q-tooltip>
-            </q-btn>
-            <q-btn flat round dense color="negative" icon="delete">
-              <q-tooltip>Eliminar</q-tooltip>
-            </q-btn>
+            <q-btn-dropdown flat dense rounded no-icon-animation dropdown-icon="more_vert">
+              <q-list padding separator>
+                <q-item clickable v-close-popup @click="viewTeam(props.row)">
+                  <q-item-section>
+                    <q-item-label>Ver detalles</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="editTeam(props.row)">
+                  <q-item-section>
+                    <q-item-label>Editar</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup>
+                  <q-item-section>
+                    <q-item-label>Eliminar</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-td>
         </template>
       </q-table>
     </q-card>
+
+    <TeamDetailDialog
+      v-if="selectedTeam"
+      v-model="showDetailDialog"
+      :selected-team="selectedTeam"
+    />
   </q-page>
 </template>
 
@@ -128,13 +144,24 @@ import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
 import type { SelectedItem } from 'src/modules/shared/types/Quasar.types';
 
+import TeamDetailDialog from 'src/modules/teams/presentation/dialogs/TeamDetailDialog.vue';
+
 const leagueViewModel = useLeagueViewModel();
-const { cities, countries, teams, loadings, setFilters, clearFilters } = useTeamViewModel();
+const {
+  cities,
+  countries,
+  teams,
+  loadings,
+  setFilters,
+  clearFilters,
+  selectedTeam,
+  selectTeam,
+  clearSelection,
+} = useTeamViewModel();
 
 // State
 const showFormDialog = ref(false);
 const showDetailDialog = ref(false);
-const selectedTeam = ref<Team | null>(null);
 const dialogMode = ref<'create' | 'edit'>('create');
 const searchText = ref('');
 const selectedCity = ref<SelectedItem | null>(null);
@@ -213,18 +240,18 @@ function clearAllFilters() {
 }
 
 function openCreateDialog() {
-  selectedTeam.value = null;
+  clearSelection();
   dialogMode.value = 'create';
   showFormDialog.value = true;
 }
 
 function viewTeam(team: Team) {
-  selectedTeam.value = team;
+  selectTeam(team);
   showDetailDialog.value = true;
 }
 
 function editTeam(team: Team) {
-  selectedTeam.value = team;
+  selectTeam(team);
   dialogMode.value = 'edit';
   showFormDialog.value = true;
 }

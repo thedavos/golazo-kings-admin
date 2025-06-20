@@ -32,20 +32,20 @@ export function useTeamViewModel() {
   } = storeToRefs(teamDetailsStore);
 
   const loadings = computed(() => ({
-    list: loadingList.value,
-    team: loadingTeam.value,
-    create: loadingCreate.value,
-    update: loadingUpdate.value,
-    delete: loadingDelete.value,
-    any: isLoadingAny.value,
+    list: loadingList?.value,
+    team: loadingTeam?.value,
+    create: loadingCreate?.value,
+    update: loadingUpdate?.value,
+    delete: loadingDelete?.value,
+    any: isLoadingAny?.value,
   }));
 
   const errors = computed(() => ({
-    list: errorTeamList.value,
-    team: errorTeam.value,
-    create: errorCreate.value,
-    update: errorUpdate.value,
-    delete: errorDelete.value,
+    list: errorTeamList?.value,
+    team: errorTeam?.value,
+    create: errorCreate?.value,
+    update: errorUpdate?.value,
+    delete: errorDelete?.value,
   }));
 
   const hasErrors = computed(() => Object.values(errors.value).some((error) => error !== null));

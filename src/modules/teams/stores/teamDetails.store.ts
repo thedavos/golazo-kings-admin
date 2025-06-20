@@ -23,7 +23,8 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
   const teamService = new TeamService();
 
   // Estado
-  const selectedTeamId = ref<number | null>(null);
+  const selectedTeam = ref<Team | null>(null);
+  const selectedTeamId = computed(() => selectedTeam.value?.id);
 
   const invalidateTeamCaches = async (teamId?: number) => {
     const promises = [];
@@ -56,7 +57,6 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
   });
 
   // Computed
-  const selectedTeam = computed(() => selectedTeamQuery.data.value || null);
   const hasSelectedTeam = computed(() => !!selectedTeam.value);
 
   const createMutation = useMutation({
@@ -90,7 +90,7 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
       notifications.notifySuccess('Equipo eliminado exitosamente');
 
       if (selectedTeamId.value === deletedId) {
-        selectedTeamId.value = null;
+        selectedTeam.value = null;
       }
 
       await invalidateTeamCaches();
@@ -100,20 +100,26 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
     },
   });
 
-  const fetchTeam = (id: number) => {
-    selectedTeamId.value = id;
-    return selectedTeamQuery.refresh();
+  const fetchTeam = async () => {
+    clearSelection();
+    await selectedTeamQuery.refresh();
+
+    if (selectedTeamQuery.data.value) {
+      selectedTeam.value = selectedTeamQuery.data.value;
+    }
+
+    return selectedTeam.value;
   };
 
-  const selectTeam = (id: number | null) => {
-    selectedTeamId.value = id;
+  const selectTeam = (team: Team) => {
+    selectedTeam.value = team;
   };
 
   const createTeam = async (teamData: CreateTeamDto, autoSelect = true) => {
     const newTeam = await createMutation.mutateAsync(teamData);
 
     if (autoSelect) {
-      selectedTeamId.value = newTeam.id;
+      selectedTeam.value = newTeam;
     }
 
     return newTeam;
@@ -139,7 +145,7 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
   };
 
   const clearSelection = () => {
-    selectedTeamId.value = null;
+    selectedTeam.value = null;
   };
 
   const isLoading = computed(
