@@ -36,7 +36,7 @@ export const useTeamListStore = defineStore('teamList', () => {
         return searchableText.includes(searchTerm);
       });
     }
-    console.log(teamFilters.city);
+
     if (teamFilters.city?.trim()) {
       result = result.filter((team) => team.city === teamFilters.city);
     }

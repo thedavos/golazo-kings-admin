@@ -54,12 +54,12 @@
 import { ref, computed, onMounted } from 'vue';
 
 // composables
-import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
+import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 
 // components
 import TeamScrapingDialog from 'src/modules/scraping/presentation/dialogs/TeamScrapingDialog.vue';
 
-const leagueViewModel = useLeagues();
+const leagueViewModel = useLeagueViewModel();
 
 // Reactive data
 const activeTab = ref('teams');

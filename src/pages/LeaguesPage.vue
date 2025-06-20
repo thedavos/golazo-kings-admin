@@ -23,7 +23,7 @@
       <q-card-section>
         <div class="row q-gutter-md">
           <q-input
-            v-model="viewModel.filters.search"
+            v-model="viewModel.filters.value.search"
             label="Buscar liga"
             outlined
             dense
@@ -35,7 +35,7 @@
           </q-input>
 
           <q-select
-            v-model="viewModel.filters.country"
+            v-model="viewModel.filters.value.country"
             :options="countryOptions"
             label="País"
             outlined
@@ -45,7 +45,7 @@
           />
 
           <q-select
-            v-model="viewModel.filters.status"
+            v-model="viewModel.filters.value.status"
             :options="statusOptions"
             label="Estado"
             outlined
@@ -55,7 +55,7 @@
           />
 
           <q-select
-            v-model="viewModel.filters.isActive"
+            v-model="viewModel.filters.value.isActive"
             :options="activeOptions"
             label="Activa"
             outlined
@@ -79,9 +79,9 @@
     <!-- Leagues Table -->
     <q-card>
       <q-table
-        :rows="viewModel.filteredLeagues.value"
+        :rows="viewModel.leagues.value"
         :columns="columns"
-        :loading="viewModel.loading.value"
+        :loading="viewModel.loadings.value.list"
         row-key="id"
         :pagination="{ rowsPerPage: 10 }"
         flat
@@ -188,8 +188,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
+import { ref, computed } from 'vue';
+import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
@@ -198,7 +198,7 @@ import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
 import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
 
-const viewModel = useLeagues();
+const viewModel = useLeagueViewModel();
 
 // Dialog states
 const showCreateDialog = ref(false);
@@ -311,9 +311,4 @@ const toggleActive = async (leagueId: number): Promise<void> => {
 const toggleVisible = async (leagueId: number): Promise<void> => {
   await viewModel.toggleLeagueVisibility(leagueId);
 };
-
-// Lifecycle
-onMounted(async () => {
-  await viewModel.loadLeagues();
-});
 </script>

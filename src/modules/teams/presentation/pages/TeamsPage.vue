@@ -123,12 +123,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useLeagues } from 'src/modules/leagues/presentation/composables/useLeagues.composable';
+import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team.viewmodel';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
 import type { SelectedItem } from 'src/modules/shared/types/Quasar.types';
 
-const leagueViewModel = useLeagues();
+const leagueViewModel = useLeagueViewModel();
 const { cities, countries, teams, loadings, setFilters, clearFilters } = useTeamViewModel();
 
 // State
@@ -139,7 +139,7 @@ const dialogMode = ref<'create' | 'edit'>('create');
 const searchText = ref('');
 const selectedCity = ref<SelectedItem | null>(null);
 const selectedCountry = ref<SelectedItem | null>(null);
-const selectedLeague = ref<SelectedItem | null>(null);
+const selectedLeague = ref<number | null>(null);
 
 // Computed
 const cityOptions = computed(() => cities.value.map((city) => ({ label: city, value: city })));
@@ -200,7 +200,7 @@ function updateFilters() {
     search: searchText.value,
     city: selectedCity.value?.value || '',
     country: selectedCountry.value?.value || '',
-    leagueId: Number(selectedLeague.value?.value) || undefined,
+    leagueId: Number(selectedLeague.value) || undefined,
   });
 }
 
@@ -233,8 +233,4 @@ function editTeam(team: Team) {
 //   showFormDialog.value = false;
 //   selectedTeam.value = null;
 // }
-
-// onMounted(async () => {
-//   await Promise.all([teamViewModel.loadTeams()]);
-// });
 </script>
