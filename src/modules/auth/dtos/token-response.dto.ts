@@ -1,11 +1,7 @@
-import type { Role } from 'src/modules/auth/domain/enums/role.enum';
+import type { UserDto } from './user.dto';
 
 export interface TokenResponseDto {
-  user: {
-    id: number;
-    email: string;
-    role: Role[];
-  }
+  user: UserDto;
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
