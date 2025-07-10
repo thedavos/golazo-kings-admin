@@ -16,7 +16,7 @@ export class ApiClient {
     }
   }
 
-  async post<T>(endpoint: string, data: any, params?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: any, params?: any): Promise<ApiResponse<T>> {
     try {
       const response = await api.post(`${this.baseURL}${endpoint}`, data, {
         params,

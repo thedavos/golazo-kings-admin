@@ -37,7 +37,7 @@
             header
             class="items-center justify-center cursor-pointer text-weight-medium text-h6"
           >
-            Golazo Kings Admin
+            Golazo Kings Manager
           </q-item-label>
 
           <q-item

@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { useMutation, useQueryCache } from '@pinia/colada';
-import { LocalStorage } from 'quasar';
 import { AuthService } from 'src/modules/auth/services/auth.service';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
+import { LoginMapper } from 'src/modules/auth/mappers/login.mapper';
 import { MESSAGES } from 'src/modules/shared/constants/messages.constant';
 import type { LoginDto } from 'src/modules/auth/dtos/login.dto';
 import type { Role } from 'src/modules/auth/domain/enums/role.enum';
@@ -13,13 +13,6 @@ const CACHE_KEYS = {
   LOGIN: ['login'] as const,
 } as const;
 
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  EXPIRES_IN: 'expires_in',
-  ROLES: 'user_roles',
-} as const;
-
 export const useAuthStore = defineStore('auth', () => {
   const notifications = useQuasarNotifications();
   const queryCache = useQueryCache();
@@ -27,11 +20,10 @@ export const useAuthStore = defineStore('auth', () => {
   // Services
   const authService = new AuthService();
 
-  // State - inicializar desde localStorage
-  const roles = ref<Role[]>(getStoredRoles());
-  const accessToken = ref<string | null>(getStoredAccessToken());
-  const refreshToken = ref<string | null>(getStoredRefreshToken());
-  const expiresIn = ref<number | null>(getStoredExpiresIn());
+  const roles = ref<Role[]>();
+  const accessToken = ref<string | null>();
+  const refreshToken = ref<string | null>();
+  const tokenExpiry = ref<number | null>(null);
 
   // Computed
   const isAuthenticated = computed(() => {
@@ -39,93 +31,23 @@ export const useAuthStore = defineStore('auth', () => {
   });
 
   const isTokenExpired = () => {
-    if (!expiresIn.value) return true;
-    return Date.now() >= expiresIn.value;
+    if (!tokenExpiry.value) return true;
+    return Date.now() >= tokenExpiry.value;
   };
-
-  function getStoredAccessToken(): string | null {
-    try {
-      return LocalStorage.getItem<string>(STORAGE_KEYS.ACCESS_TOKEN);
-    } catch {
-      return null;
-    }
-  }
-
-  function getStoredRefreshToken(): string | null {
-    try {
-      return LocalStorage.getItem<string>(STORAGE_KEYS.REFRESH_TOKEN);
-    } catch {
-      return null;
-    }
-  }
-
-  function getStoredExpiresIn(): number | null {
-    try {
-      const stored = LocalStorage.getItem<string>(STORAGE_KEYS.EXPIRES_IN);
-      return stored ? parseInt(stored, 10) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function getStoredRoles(): Role[] {
-    try {
-      const stored = LocalStorage.getItem<string>(STORAGE_KEYS.ROLES);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveTokensToStorage(tokens: {
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-    roles: Role[];
-  }) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
-      localStorage.setItem(STORAGE_KEYS.EXPIRES_IN, tokens.expiresIn.toString());
-      localStorage.setItem(STORAGE_KEYS.ROLES, JSON.stringify(tokens.roles));
-    } catch (error) {
-      console.error('Error saving tokens to storage:', error);
-    }
-  }
-
-  function clearTokensFromStorage() {
-    try {
-      localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.EXPIRES_IN);
-      localStorage.removeItem(STORAGE_KEYS.ROLES);
-    } catch (error) {
-      console.error('Error clearing tokens from storage:', error);
-    }
-  }
-
   const setTokens = (loginData: TokenResponseDto) => {
     const expirationTime = Date.now() + loginData.expiresIn * 1000;
 
-    roles.value = loginData.user.role;
+    roles.value = loginData.user.roles.map((role) => role.name) as Role[];
     accessToken.value = loginData.accessToken;
     refreshToken.value = loginData.refreshToken;
-    expiresIn.value = expirationTime;
-
-    saveTokensToStorage({
-      accessToken: loginData.accessToken,
-      refreshToken: loginData.refreshToken,
-      expiresIn: expirationTime,
-      roles: loginData.user.role,
-    });
+    tokenExpiry.value = expirationTime;
   };
 
   const clearTokens = () => {
     roles.value = [];
     accessToken.value = null;
     refreshToken.value = null;
-    expiresIn.value = null;
-    clearTokensFromStorage();
+    tokenExpiry.value = null;
   };
 
   const logout = async () => {
@@ -146,7 +68,8 @@ export const useAuthStore = defineStore('auth', () => {
       if (!refreshToken.value) {
         throw new Error('No refresh token available');
       }
-      return authService.refreshToken(refreshToken.value);
+
+      return authService.refreshToken();
     },
     onSuccess(refreshData) {
       setTokens(refreshData);
@@ -176,7 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Refrescar si el token expira en los próximos 5 minutos
     const fiveMinutesFromNow = Date.now() + 5 * 60 * 1000;
 
-    if (expiresIn.value && expiresIn.value <= fiveMinutesFromNow) {
+    if (tokenExpiry.value && tokenExpiry.value <= fiveMinutesFromNow) {
       return await refreshTokenAsync();
     }
 
@@ -192,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loginMutation = useMutation({
     mutation: (loginDto: LoginDto) => authService.login(loginDto),
     async onSuccess(loginData) {
-      setTokens(loginData);
+      setTokens(LoginMapper.toDto(loginData));
       await invalidateLoginCache();
     },
     onError(error) {
@@ -206,7 +129,7 @@ export const useAuthStore = defineStore('auth', () => {
     roles,
     accessToken,
     refreshToken,
-    expiresIn,
+    tokenExpiry,
 
     // Computed
     isAuthenticated,

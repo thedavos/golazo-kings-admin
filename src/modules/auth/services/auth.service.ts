@@ -1,5 +1,6 @@
 import { ApiClient } from 'src/modules/shared/api/client.api';
-import type { LoginDto } from 'src/modules/auth/dtos/login.dto';
+import { LoginMapper } from 'src/modules/auth/mappers/login.mapper';
+import type { LoginDto, LoginResponseDto } from 'src/modules/auth/dtos/login.dto';
 import type { TokenResponseDto } from 'src/modules/auth/dtos/token-response.dto';
 import type { RegisterDto } from 'src/modules/auth/dtos/register.dto';
 import type { AuthResponseDto } from 'src/modules/auth/dtos/auth-response.dto';
@@ -12,9 +13,9 @@ export class AuthService {
     this.apiClient = new ApiClient();
   }
 
-  async login(loginDto: LoginDto): Promise<TokenResponseDto> {
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const loginResponse = await this.apiClient.post<TokenResponseDto>('/auth/login', loginDto);
-    return loginResponse.data;
+    return LoginMapper.fromDto(loginResponse.data);
   }
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -26,10 +27,9 @@ export class AuthService {
     return registerResponse.data;
   }
 
-  async refreshToken(refreshToken: string): Promise<TokenResponseDto> {
-    const refreshResponse = await this.apiClient.post<TokenResponseDto>('/auth/refresh', {
-      refreshToken,
-    });
+  async refreshToken(): Promise<TokenResponseDto> {
+    const refreshResponse = await this.apiClient.post<TokenResponseDto>('/auth/refresh');
+
     return refreshResponse.data;
   }
 

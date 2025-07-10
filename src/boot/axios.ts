@@ -15,10 +15,10 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'http://localhost:3000' });
+const api = axios.create({ baseURL: 'http://localhost:3000', withCredentials: true });
 
-api.interceptors.request.use(
-  (config) => {
+export default defineBoot(({ app }) => {
+  api.interceptors.request.use((config) => {
     const authStore = useAuthStore();
     const token = authStore.accessToken;
 
@@ -27,14 +27,26 @@ api.interceptors.request.use(
     }
 
     return config;
-  },
-  (error) => {
-    return Promise.reject(error as Error);
-  },
-);
+  });
 
-export default defineBoot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const authStore = useAuthStore();
+
+      if (error.response?.status === 401 && authStore.accessToken) {
+        const refreshed = await authStore.refreshTokenAsync();
+
+        if (refreshed) {
+          return api.request(error.config);
+        } else {
+          window.location.href = '/';
+        }
+      }
+
+      return error;
+    },
+  );
 
   app.config.globalProperties.$axios = axios;
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
