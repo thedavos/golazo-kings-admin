@@ -7,6 +7,8 @@ export class ScrapedTeam {
   public readonly leagueId: number;
   public readonly scrapedAt: Date;
   public readonly source: string;
+  public readonly referenceId: number | null;
+  public readonly referenceUrl: string | null;
 
   constructor(data: {
     name: string;
@@ -15,6 +17,8 @@ export class ScrapedTeam {
     leagueId: number;
     scrapedAt?: Date;
     source?: string;
+    referenceId?: number | null;
+    referenceUrl?: string | null;
   }) {
     this.name = data.name;
     this.logoUrl = data.logoUrl;
@@ -22,6 +26,8 @@ export class ScrapedTeam {
     this.leagueId = data.leagueId;
     this.scrapedAt = data.scrapedAt || new Date();
     this.source = data.source || 'kingsleague.pro';
+    this.referenceId = data.referenceId || null;
+    this.referenceUrl = data.referenceUrl || null;
   }
 
   public isValid(): boolean {

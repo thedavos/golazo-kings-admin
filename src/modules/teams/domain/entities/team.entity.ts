@@ -19,6 +19,8 @@ export class Team {
   public readonly uuid: string;
   public readonly slug: string;
   public readonly name: string;
+  public readonly referenceId: number | null;
+  public readonly referenceUrl: string | null;
   public readonly abbr: string | null;
   public readonly logoUrl: string | null;
   public readonly city: string;
@@ -34,6 +36,8 @@ export class Team {
     uuid: string;
     slug: string;
     name: string;
+    referenceId: number | null;
+    referenceUrl: string | null;
     abbr: string | null;
     city: string;
     country: string;
@@ -48,6 +52,8 @@ export class Team {
     this.uuid = data.uuid;
     this.slug = data.slug;
     this.name = data.name;
+    this.referenceId = data.referenceId;
+    this.referenceUrl = data.referenceUrl;
     this.abbr = data.abbr;
     this.city = data.city;
     this.country = data.country;

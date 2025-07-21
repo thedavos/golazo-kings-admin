@@ -1,4 +1,4 @@
-import { computed, readonly } from 'vue';
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useTeamFiltersStore } from 'src/modules/teams/stores/teamFilters.store';
 import { useTeamListStore } from 'src/modules/teams/stores/teamList.store';
@@ -53,10 +53,10 @@ export function useTeamViewModel() {
   return {
     // State
     filters,
-    teams: readonly(teams),
-    cities: readonly(cities),
-    countries: readonly(countries),
-    selectedTeam: readonly(selectedTeam),
+    teams,
+    cities,
+    countries,
+    selectedTeam,
 
     // Computed
     loadings,

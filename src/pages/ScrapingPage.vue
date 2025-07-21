@@ -47,6 +47,12 @@
       :leagues="leagues"
       @scraping-completed="onTeamScrapingCompleted"
     />
+
+    <PlayerScrapingDialog
+      v-model="showPlayerScrapingDialog"
+      :teams="teams"
+      @scraping-completed="onPlayerScrapingCompleted"
+    />
   </q-page>
 </template>
 
@@ -55,11 +61,14 @@ import { ref, computed, onMounted } from 'vue';
 
 // composables
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
+import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team.viewmodel';
 
 // components
 import TeamScrapingDialog from 'src/modules/scraping/presentation/dialogs/TeamScrapingDialog.vue';
+import PlayerScrapingDialog from 'src/modules/scraping/presentation/dialogs/PlayerScrapingDialog.vue';
 
 const leagueViewModel = useLeagueViewModel();
+const teamViewModel = useTeamViewModel();
 
 // Reactive data
 const activeTab = ref('teams');
@@ -68,6 +77,7 @@ const showPlayerScrapingDialog = ref(false);
 
 // Computed
 const leagues = computed(() => leagueViewModel.leagues.value);
+const teams = computed(() => teamViewModel.teams.value);
 
 // Methods
 const openTeamScrapingDialog = () => {
@@ -86,8 +96,12 @@ const onTeamScrapingCompleted = () => {
   // refreshTeamData();
 };
 
+const onPlayerScrapingCompleted = () => {
+  //
+};
+
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([leagueViewModel.loadLeagues()]);
+  await Promise.all([leagueViewModel.loadLeagues(), teamViewModel.loadTeams()]);
 });
 </script>

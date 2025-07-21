@@ -3,6 +3,8 @@ export interface TeamDto {
   uuid: string;
   slug: string;
   name: string;
+  referenceId: number | null;
+  referenceUrl: string | null;
   abbr: string | null;
   logoUrl: string | null;
   city: string;

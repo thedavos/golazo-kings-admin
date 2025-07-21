@@ -3,4 +3,6 @@ export interface ScrapedTeamDto {
   logo: string;
   slug: string;
   leagueId: number;
+  referenceId: number | null;
+  referenceUrl: string | null;
 }

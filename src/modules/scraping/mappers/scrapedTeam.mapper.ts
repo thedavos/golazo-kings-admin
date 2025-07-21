@@ -8,6 +8,8 @@ export class ScrapedTeamMapper {
       logoUrl: dto.logo,
       slug: dto.slug,
       leagueId: dto.leagueId,
+      referenceId: dto.referenceId,
+      referenceUrl: dto.referenceUrl,
     });
   }
 
@@ -21,14 +23,12 @@ export class ScrapedTeamMapper {
       logo: scrapedTeam.logoUrl,
       leagueId: scrapedTeam.leagueId,
       slug: scrapedTeam.slug,
+      referenceId: scrapedTeam.referenceId,
+      referenceUrl: scrapedTeam.referenceUrl,
     };
   }
 
   static toDtos(scrapedTeams: ScrapedTeam[]): ScrapedTeamDto[] {
     return scrapedTeams.map((scrapedTeam) => this.toDto(scrapedTeam));
   }
-
-  // static toCreateTeamDto(scrapedTeam: ScrapedTeam): CreateTeamDto {
-  //   return scrapedTeam.toCreateTeamData();
-  // }
 }
