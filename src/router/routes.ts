@@ -1,8 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+const addAuthMeta = () => ({
+  meta: {
+    requiresAuth: true,
+  },
+});
+
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
+    path: '/login',
     component: () => import('src/modules/auth/presentation/layouts/AuthLayout.vue'),
     children: [
       { path: '', component: () => import('src/modules/auth/presentation/pages/LoginPage.vue') },
@@ -13,6 +19,7 @@ const routes: RouteRecordRaw[] = [
     path: '/dashboard',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    ...addAuthMeta(),
   },
 
   {
@@ -26,6 +33,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
       },
     ],
+    ...addAuthMeta(),
   },
 
   {
@@ -37,12 +45,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
       },
     ],
+    ...addAuthMeta(),
   },
 
   {
     path: '/scraping',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/ScrapingPage.vue') }],
+    ...addAuthMeta(),
   },
 
   // Always leave this as last one,

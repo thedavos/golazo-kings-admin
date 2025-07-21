@@ -8,6 +8,7 @@ import type { UserResponseDto } from 'src/modules/auth/dtos/user-response.dto';
 
 export class AuthService {
   private apiClient: ApiClient;
+  public static readonly REFRESH_TOKEN_COOKIE = 'golazo_refresh_token';
 
   constructor() {
     this.apiClient = new ApiClient();
@@ -33,12 +34,21 @@ export class AuthService {
     return refreshResponse.data;
   }
 
-  async logout(refreshToken: string): Promise<void> {
-    await this.apiClient.post('/auth/logout', { refreshToken });
+  async logout(): Promise<void> {
+    await this.apiClient.post('/auth/logout', {});
   }
 
   async getProfile(): Promise<UserResponseDto> {
     const profileResponse = await this.apiClient.get<UserResponseDto>('/auth/profile');
     return profileResponse.data;
+  }
+
+  async checkRefreshTokenValidity(): Promise<boolean> {
+    try {
+      await this.apiClient.post('/auth/refresh', {});
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

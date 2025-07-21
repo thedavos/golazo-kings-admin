@@ -22,39 +22,42 @@ export const useAuthStore = defineStore('auth', () => {
 
   const roles = ref<Role[]>();
   const accessToken = ref<string | null>();
-  const refreshToken = ref<string | null>();
   const tokenExpiry = ref<number | null>(null);
+  const hasRefreshToken = ref<boolean>(false); // Flag para saber si hay cookie
 
   // Computed
   const isAuthenticated = computed(() => {
     return !!accessToken.value && !isTokenExpired();
   });
 
+  const hasValidRefreshToken = computed(() => {
+    return hasRefreshToken.value;
+  });
+
   const isTokenExpired = () => {
     if (!tokenExpiry.value) return true;
     return Date.now() >= tokenExpiry.value;
   };
+
   const setTokens = (loginData: TokenResponseDto) => {
     const expirationTime = Date.now() + loginData.expiresIn * 1000;
 
     roles.value = loginData.user.roles.map((role) => role.name) as Role[];
     accessToken.value = loginData.accessToken;
-    refreshToken.value = loginData.refreshToken;
     tokenExpiry.value = expirationTime;
+    hasRefreshToken.value = true;
   };
 
   const clearTokens = () => {
     roles.value = [];
     accessToken.value = null;
-    refreshToken.value = null;
     tokenExpiry.value = null;
+    hasRefreshToken.value = false;
   };
 
   const logout = async () => {
     try {
-      if (refreshToken.value) {
-        await authService.logout(refreshToken.value);
-      }
+      await authService.logout();
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
@@ -64,13 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const refreshTokenMutation = useMutation({
-    mutation: () => {
-      if (!refreshToken.value) {
-        throw new Error('No refresh token available');
-      }
-
-      return authService.refreshToken();
-    },
+    mutation: () => authService.refreshToken(),
     onSuccess(refreshData) {
       setTokens(refreshData);
     },
@@ -81,8 +78,6 @@ export const useAuthStore = defineStore('auth', () => {
   });
 
   const refreshTokenAsync = async (): Promise<boolean> => {
-    if (!refreshToken.value) return false;
-
     try {
       await refreshTokenMutation.mutateAsync();
       return true;
@@ -94,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const refreshTokenIfNeeded = async () => {
-    if (!refreshToken.value) return false;
+    if (!hasValidRefreshToken.value) return false;
 
     // Refrescar si el token expira en los próximos 5 minutos
     const fiveMinutesFromNow = Date.now() + 5 * 60 * 1000;
@@ -104,6 +99,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     return true;
+  };
+
+  const initializeAuth = async () => {
+    try {
+      await refreshTokenAsync();
+    } catch (e) {
+      const error = e as Error;
+      console.error('Failed to initialize auth:', error);
+      clearTokens();
+    }
   };
 
   const invalidateLoginCache = async () => {
@@ -128,17 +133,18 @@ export const useAuthStore = defineStore('auth', () => {
     // State
     roles,
     accessToken,
-    refreshToken,
     tokenExpiry,
 
     // Computed
     isAuthenticated,
+    hasValidRefreshToken,
 
     // Actions
     login: loginMutation.mutateAsync,
     logout,
     refreshTokenIfNeeded,
     refreshTokenAsync,
+    initializeAuth,
     clearTokens,
 
     // Loading states
