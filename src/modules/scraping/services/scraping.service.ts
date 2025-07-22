@@ -1,6 +1,7 @@
 import { ApiClient } from 'src/modules/shared/api/client.api';
 import { ScrapedTeamMapper } from 'src/modules/scraping/mappers/scrapedTeam.mapper';
 import { TeamMapper } from 'src/modules/teams/mappers/team.mapper';
+import { ScrapedPlayerMapper } from 'src/modules/scraping/mappers/scrapedPlayer.mapper';
 import type { TeamDto } from 'src/modules/teams/dtos/team.dto';
 import type { ScrapedTeamDto } from 'src/modules/scraping/dtos/scrapedTeam.dto';
 import type { ScrapedTeamRequestDto } from 'src/modules/scraping/dtos/scrapedTeamRequest.dto';
@@ -8,6 +9,9 @@ import type { CreateTeamByScrapingDto } from 'src/modules/scraping/dtos/createTe
 import type { UpdateTeamByScrapingDto } from 'src/modules/scraping/dtos/updateTeamByScraping.dto';
 import type { ScrapedTeam } from 'src/modules/scraping/domain/entities/scrapedTeam.entity';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
+import type { ScrapedPlayerRequestDto } from 'src/modules/scraping/dtos/scrapedPlayerRequest.dto';
+import type { ScrapedPlayerDto } from 'src/modules/scraping/dtos/scrapedPlayer.dto';
+import type { ScrapedPlayer } from 'src/modules/scraping/domain/entities/scrapedPlayer.entity';
 
 export class ScrapingService {
   private apiClient: ApiClient;
@@ -43,5 +47,16 @@ export class ScrapingService {
     );
 
     return TeamMapper.fromDto(response.data);
+  }
+
+  async getScrapedPlayers(
+    scrapedPlayerRequestDto: ScrapedPlayerRequestDto,
+  ): Promise<ScrapedPlayer[]> {
+    const response = await this.apiClient.post<ScrapedPlayerDto[]>(
+      `/admin/scraping/players`,
+      scrapedPlayerRequestDto,
+    );
+
+    return ScrapedPlayerMapper.fromDtos(response.data);
   }
 }

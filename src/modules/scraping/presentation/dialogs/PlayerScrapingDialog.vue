@@ -138,6 +138,17 @@
                   </q-item-section>
                 </q-item>
               </div>
+
+              <div class="col-12 col-md-6">
+                <q-item tag="label" v-ripple>
+                  <q-item-section avatar>
+                    <q-checkbox v-model="scrapingOptions.isQueensLeague" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Queens League</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </div>
             </div>
           </div>
 
@@ -178,7 +189,7 @@
                         <div class="text-h6">Jugadores Creados</div>
                       </q-card-section>
                       <q-card-section class="text-center">
-                        <div class="text-h4">{{ scrapingResult.createdCount || 0 }}</div>
+                        <div class="text-h4">{{ scrapingResult.itemsCreated || 0 }}</div>
                       </q-card-section>
                     </q-card>
                   </div>
@@ -189,7 +200,7 @@
                         <div class="text-h6">Jugadores Actualizados</div>
                       </q-card-section>
                       <q-card-section class="text-center">
-                        <div class="text-h4">{{ scrapingResult.updatedCount || 0 }}</div>
+                        <div class="text-h4">{{ scrapingResult.itemsUpdated || 0 }}</div>
                       </q-card-section>
                     </q-card>
                   </div>
@@ -200,7 +211,7 @@
                         <div class="text-h6">Jugadores Procesados</div>
                       </q-card-section>
                       <q-card-section class="text-center">
-                        <div class="text-h4">{{ scrapingResult.totalCount || 0 }}</div>
+                        <div class="text-h4">{{ scrapingResult.itemsScraped || 0 }}</div>
                       </q-card-section>
                     </q-card>
                   </div>
@@ -220,10 +231,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Team } from 'src/modules/teams/domain/entities/team.entity';
-// import { useScraping } from 'src/modules/scraping/presentation/composables/useScraping.composable';
+import { reactive, ref } from 'vue';
+import { useScrapingPlayers } from 'src/modules/scraping/presentation/composables/useScrapingPlayers.composable';
 import { ScrapingType } from 'src/modules/scraping/domain/enums/scrapingType.enum';
+import type { Team } from 'src/modules/teams/domain/entities/team.entity';
+import type { PlayerScrapingResult } from 'src/modules/scraping/dtos/scrapingResult.dto';
+import type { ScrapingOptions } from 'src/modules/scraping/presentation/composables/useScraping.composable';
 
 // Props
 interface Props {
@@ -242,27 +255,34 @@ interface Emits {
 const emit = defineEmits<Emits>();
 
 // Composables
-// const scrapingViewModel = useScraping();
+const { scrapePlayersByTeam } = useScrapingPlayers();
 
 // Reactive data
 const step = ref(1);
 const selectedTeam = ref<Team | null>(null);
 const loading = ref(false);
-const scrapingResult = ref({
-  createdCount: 0,
-  updatedCount: 0,
-  totalCount: 0,
-  timestamp: new Date().toISOString(),
+const scrapingResult = reactive<PlayerScrapingResult>({
+  type: ScrapingType.PLAYERS,
+  itemsScraped: 0,
+  itemsUpdated: 0,
+  itemsCreated: 0,
+  success: false,
+  scrapedItems: [],
+  details: {},
+  duration: 0,
+  errors: [],
+  timestamp: new Date(),
 });
 
 // Scraping options
-const scrapingOptions = ref({
+const scrapingOptions = ref<ScrapingOptions>({
   createMissing: true,
   activateNew: true,
   updateExisting: true,
   preserveManualData: true,
   nameFilter: '',
-  positionFilter: null,
+  positionFilter: '',
+  isQueensLeague: false,
   includeInactive: false,
 });
 
@@ -275,25 +295,23 @@ const positionOptions = [
 ];
 
 // Methods
-const startScraping = () => {
+const startScraping = async () => {
   if (!selectedTeam.value) return;
 
   loading.value = true;
 
   try {
-    // Aquí iría la llamada al método de scraping de jugadores
-    // const result = await scrapingViewModel.scrapePlayersByTeam(selectedTeam.value, scrapingOptions.value);
+    const result = await scrapePlayersByTeam(selectedTeam.value, scrapingOptions.value);
 
-    // Simulación de resultado para el ejemplo
-    const result = {
-      createdCount: Math.floor(Math.random() * 5),
-      updatedCount: Math.floor(Math.random() * 10),
-      totalCount: Math.floor(Math.random() * 15) + 10,
-      timestamp: new Date().toISOString(),
-      type: ScrapingType.PLAYERS,
-    };
+    scrapingResult.itemsScraped = result.itemsScraped;
+    scrapingResult.itemsUpdated = result.itemsUpdated;
+    scrapingResult.itemsCreated = result.itemsCreated;
+    scrapingResult.success = result.success;
+    scrapingResult.scrapedItems = result.scrapedItems;
+    scrapingResult.details = result.details!;
+    scrapingResult.duration = result.duration;
+    scrapingResult.errors = result.errors;
 
-    scrapingResult.value = result;
     emit('scraping-completed', result);
     step.value = 3;
   } catch (error) {
@@ -312,14 +330,18 @@ const resetScraping = () => {
     updateExisting: true,
     preserveManualData: true,
     nameFilter: '',
-    positionFilter: null,
+    positionFilter: '',
     includeInactive: false,
   };
-  scrapingResult.value = {
-    createdCount: 0,
-    updatedCount: 0,
-    totalCount: 0,
-    timestamp: new Date().toISOString(),
-  };
+
+  scrapingResult.itemsScraped = 0;
+  scrapingResult.itemsUpdated = 0;
+  scrapingResult.itemsCreated = 0;
+  scrapingResult.success = false;
+  scrapingResult.scrapedItems = [];
+  scrapingResult.details = {};
+  scrapingResult.duration = 0;
+  scrapingResult.errors = [];
+  scrapingResult.timestamp = new Date();
 };
 </script>

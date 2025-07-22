@@ -1,5 +1,6 @@
 import type { ScrapingType } from 'src/modules/scraping/domain/enums/scrapingType.enum';
 import type { ScrapedTeam } from 'src/modules/scraping/domain/entities/scrapedTeam.entity';
+import type { ScrapedPlayer } from 'src/modules/scraping/domain/entities/scrapedPlayer.entity';
 
 export interface ScrapingResult {
   success: boolean;
@@ -16,6 +17,11 @@ export interface ScrapingResult {
     teamName?: string;
     [key: string]: any;
   };
+}
+
+export interface PlayerScrapingResult extends ScrapingResult {
+  type: ScrapingType.PLAYERS;
+  scrapedItems: ScrapedPlayer[];
 }
 
 export interface TeamScrapingResult extends ScrapingResult {

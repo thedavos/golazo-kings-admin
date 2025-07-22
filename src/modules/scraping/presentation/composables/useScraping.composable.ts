@@ -17,9 +17,13 @@ import type {
 
 export interface ScrapingOptions {
   createMissing: boolean;
+  activateNew?: boolean;
   updateExisting: boolean;
   preserveManualData: boolean;
+  positionFilter?: string;
   nameFilter?: string;
+  includeInactive?: boolean;
+  isQueensLeague?: boolean;
 }
 
 export function useScraping() {
