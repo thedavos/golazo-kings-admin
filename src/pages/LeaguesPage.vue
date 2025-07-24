@@ -189,6 +189,13 @@
       :view-league="leagueToView"
       @close="onCloseViewDialog"
     />
+
+    <create-league-dialog
+      v-model="showCreateDialog"
+      :loading="viewModel.loadings.value.create"
+      @submit="onCreateLeague"
+      @close="onCloseCreateDialog"
+    />
   </q-page>
 </template>
 
@@ -199,10 +206,11 @@ import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
-// import type { CreateLeagueDto } from 'src/modules/leagues/dtos/create-league.dto';
+import type { CreateLeagueDto } from 'src/modules/leagues/dtos/create-league.dto';
 
 import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
 import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
+import CreateLeagueDialog from 'src/modules/leagues/presentation/dialogs/CreateLeagueDialog.vue';
 
 const router = useRouter();
 const viewModel = useLeagueViewModel();
@@ -321,5 +329,19 @@ const toggleActive = async (leagueId: number): Promise<void> => {
 
 const toggleVisible = async (leagueId: number): Promise<void> => {
   await viewModel.toggleLeagueVisibility(leagueId);
+};
+
+const onCreateLeague = async (leagueData: CreateLeagueDto): Promise<void> => {
+  try {
+    await viewModel.createLeague(leagueData);
+    showCreateDialog.value = false;
+    await viewModel.loadLeagues();
+  } catch (error) {
+    console.error('Error creating league:', error);
+  }
+};
+
+const onCloseCreateDialog = (): void => {
+  showCreateDialog.value = false;
 };
 </script>
