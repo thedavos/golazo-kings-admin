@@ -188,6 +188,7 @@
       :model-value="showDetailsDialog"
       :view-league="leagueToView"
       @close="onCloseViewDialog"
+      @edit="editLeague(leagueToView)"
     />
 
     <create-league-dialog

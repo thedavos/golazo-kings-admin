@@ -34,6 +34,10 @@ export const useTeamFiltersStore = defineStore('teamFilters', () => {
     filters.value = { ...filters.value, ...validatedFilters };
   };
 
+  const setLeagueFilter = (leagueId: number | null): void => {
+    filters.value = { ...filters.value, leagueId };
+  };
+
   const hasActiveFilters = computed(() => {
     return !!(
       filters.value.search ||
@@ -70,6 +74,7 @@ export const useTeamFiltersStore = defineStore('teamFilters', () => {
 
     // Actions
     setFilters,
+    setLeagueFilter,
     clearFilters,
     clearFilter,
   };

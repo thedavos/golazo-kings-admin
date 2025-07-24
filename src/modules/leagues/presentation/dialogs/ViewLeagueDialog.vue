@@ -5,157 +5,101 @@
     maximized
     transition-show="slide-up"
     transition-hide="slide-down"
+    class="league-detail-dialog"
   >
-    <q-card class="column full-height">
-      <!-- Header -->
-      <q-card-section class="row items-center q-pa-md text-white">
-        <q-icon name="visibility" size="md" class="q-mr-md" />
-        <div class="text-h6">Detalles de la Liga</div>
+    <q-card class="full-height">
+      <!-- Header with breadcrumbs and close -->
+      <q-card-section class="row items-center q-pa-md bg-primary">
+        <div class="row items-center">
+          <q-breadcrumbs>
+            <q-breadcrumbs-el class="text-secondary" icon="home" to="/dashboard" label="Inicio" />
+            <q-breadcrumbs-el
+              class="text-secondary"
+              icon="sports_soccer"
+              to="/leagues"
+              label="Ligas"
+            />
+            <q-breadcrumbs-el
+              class="text-white"
+              :label="viewLeague?.name || 'Detalles de la Liga'"
+            />>
+          </q-breadcrumbs>
+        </div>
         <q-space />
         <q-btn icon="close" flat round dense @click="close" />
       </q-card-section>
 
-      <q-card-section v-if="viewLeague">
-        <div class="text-h6 q-mb-md">
-          {{ viewLeague.name }}
+      <template v-if="viewLeague">
+        <!-- Hero Section -->
+        <league-hero-section :league="viewLeague" @edit="editLeague" @view-teams="viewTeams" />
+
+        <!-- Tabs Content -->
+        <q-card-section class="q-pa-none">
+          <q-tabs v-model="activeTab" class="text-grey-7" align="left" narrow-indicator dense>
+            <q-tab name="general" label="General" />
+            <q-tab name="teams" label="Equipos" />
+            <q-tab name="seasons" label="Temporadas" />
+            <q-tab name="stats" label="Estadísticas" />
+          </q-tabs>
+
+          <q-separator />
+
+          <q-tab-panels v-model="activeTab" animated>
+            <!-- General Tab -->
+            <q-tab-panel name="general" class="q-pa-md">
+              <league-general-info :league="viewLeague" />
+            </q-tab-panel>
+
+            <!-- Teams Tab -->
+            <q-tab-panel name="teams" class="q-pa-md">
+              <league-teams-section
+                :league-id="viewLeague.id"
+                @add-team="addTeam"
+                @view-team="viewTeam"
+                @edit-team="editTeam"
+                @remove-team="removeTeam"
+              />
+            </q-tab-panel>
+
+            <!-- Seasons Tab -->
+            <q-tab-panel name="seasons" class="q-pa-md">
+              <league-seasons-section
+                :league="viewLeague"
+                @add-season="addSeason"
+                @view-season="viewSeason"
+                @edit-season="editSeason"
+                @activate-season="activateSeason"
+                @deactivate-season="deactivateSeason"
+              />
+            </q-tab-panel>
+
+            <!-- Stats Tab -->
+            <q-tab-panel name="stats" class="q-pa-md">
+              <league-stats-section :league="viewLeague" />
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-card-section>
+      </template>
+
+      <!-- Loading state -->
+      <template v-else>
+        <div class="column items-center justify-center q-pa-xl">
+          <q-spinner size="3rem" color="primary" />
+          <div class="text-subtitle1 q-mt-md">Cargando información de la liga...</div>
         </div>
-
-        <div class="row q-gutter-md">
-          <div class="col-md-6 col-xs-12">
-            <q-list bordered>
-              <q-item>
-                <q-item-section>
-                  <q-item-label overline>Información básica</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Nombre completo</q-item-label>
-                  <q-item-label caption>{{ viewLeague.name }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Abreviación</q-item-label>
-                  <q-item-label caption>{{ viewLeague.abbr }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Ubicación</q-item-label>
-                  <q-item-label caption>{{ viewLeague.location }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Número de equipos</q-item-label>
-                  <q-item-label caption>{{ viewLeague.numberOfTeams }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-
-          <div class="col-md-6 col-xs-12">
-            <q-list bordered>
-              <q-item>
-                <q-item-section>
-                  <q-item-label overline>Estado y configuración</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Estado</q-item-label>
-                  <q-item-label caption>
-                    <q-chip
-                      :color="getStatusColor(viewLeague.status)"
-                      text-color="white"
-                      :label="viewLeague.status"
-                      size="sm"
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Liga activa</q-item-label>
-                  <q-item-label caption>
-                    <q-chip
-                      :color="viewLeague.isActive ? 'positive' : 'negative'"
-                      text-color="white"
-                      :label="viewLeague.isActive ? 'Sí' : 'No'"
-                      size="sm"
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Liga visible</q-item-label>
-                  <q-item-label caption>
-                    <q-chip
-                      :color="viewLeague.isVisible ? 'info' : 'grey'"
-                      text-color="white"
-                      :label="viewLeague.isVisible ? 'Sí' : 'No'"
-                      size="sm"
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label>Temporadas activas</q-item-label>
-                  <q-item-label caption>
-                    {{ viewLeague.hasActiveSeason() ? 'Sí' : 'No' }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </div>
-
-        <div class="q-mt-md">
-          <q-item-label overline>Descripción</q-item-label>
-          <p>{{ viewLeague.description }}</p>
-        </div>
-
-        <div class="q-mt-md" v-if="viewLeague.seasons.length > 0">
-          <q-item-label overline>Temporadas ({{ viewLeague.seasons.length }})</q-item-label>
-          <q-list bordered>
-            <q-item v-for="season in viewLeague.seasons" :key="season.id">
-              <q-item-section>
-                <q-item-label>{{ season.name }}</q-item-label>
-                <q-item-label caption>
-                  {{ season.startDate ? season.startDate.toLocaleDateString() : 'Sin fecha' }} -
-                  {{ season.endDate ? season.endDate.toLocaleDateString() : 'Sin fecha' }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side v-if="season.isActive">
-                <q-chip color="positive" text-color="white" label="Activa" size="sm" />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-      </q-card-section>
-
-      <!--      <q-card-actions align="right">-->
-      <!--        <q-btn flat label="Cerrar" @click="showDetailsDialog = false" />-->
-      <!--        <q-btn color="warning" label="Editar" @click="editFromDetails" />-->
-      <!--      </q-card-actions>-->
+      </template>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { getStatusColor } from 'src/modules/leagues/presentation/utils/getStatusColor.utils';
+import { computed, ref } from 'vue';
+import { useQuasar } from 'quasar';
+import LeagueHeroSection from '../components/LeagueHeroSection.vue';
+import LeagueGeneralInfo from '../components/LeagueGeneralInfo.vue';
+import LeagueTeamsSection from '../components/LeagueTeamsSection.vue';
+import LeagueSeasonsSection from '../components/LeagueSeasonsSection.vue';
+import LeagueStatsSection from '../components/LeagueStatsSection.vue';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 
 interface Props {
@@ -167,10 +111,15 @@ interface Props {
 interface Emits {
   (e: 'update:modelValue', value: boolean): void;
   (e: 'close'): void;
+  (e: 'edit'): void;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+const $q = useQuasar();
+
+// State
+const activeTab = ref('general');
 
 // Computed
 const isOpen = computed({
@@ -178,7 +127,81 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
+// Methods
 const close = () => {
   emit('close');
+};
+
+const editLeague = () => {
+  emit('edit');
+};
+
+// Team actions
+const viewTeams = () => {
+  activeTab.value = 'teams';
+};
+
+const addTeam = () => {
+  $q.notify({
+    message: 'Funcionalidad para agregar equipo pendiente de implementación',
+    color: 'info',
+  });
+};
+
+const viewTeam = (teamId: number) => {
+  $q.notify({
+    message: `Ver equipo con ID: ${teamId}`,
+    color: 'info',
+  });
+};
+
+const editTeam = (teamId: number) => {
+  $q.notify({
+    message: `Editar equipo con ID: ${teamId}`,
+    color: 'info',
+  });
+};
+
+const removeTeam = (teamId: number) => {
+  $q.notify({
+    message: `Eliminar equipo con ID: ${teamId}`,
+    color: 'info',
+  });
+};
+
+// Season actions
+const addSeason = () => {
+  $q.notify({
+    message: 'Funcionalidad para agregar temporada pendiente de implementación',
+    color: 'info',
+  });
+};
+
+const viewSeason = (seasonId: number) => {
+  $q.notify({
+    message: `Ver temporada con ID: ${seasonId}`,
+    color: 'info',
+  });
+};
+
+const editSeason = (seasonId: number) => {
+  $q.notify({
+    message: `Editar temporada con ID: ${seasonId}`,
+    color: 'info',
+  });
+};
+
+const activateSeason = (seasonId: number) => {
+  $q.notify({
+    message: `Activar temporada con ID: ${seasonId}`,
+    color: 'info',
+  });
+};
+
+const deactivateSeason = (seasonId: number) => {
+  $q.notify({
+    message: `Desactivar temporada con ID: ${seasonId}`,
+    color: 'info',
+  });
 };
 </script>

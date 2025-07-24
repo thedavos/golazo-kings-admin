@@ -153,7 +153,7 @@
                 <q-item-section>
                   <q-item-label caption>Fecha de Creación</q-item-label>
                   <q-item-label class="text-body1">{{
-                    formatDate(selectedTeam.createdAt)
+                    formatDateForDisplay(selectedTeam.createdAt)
                   }}</q-item-label>
                 </q-item-section>
               </q-item>
@@ -165,7 +165,7 @@
                 <q-item-section>
                   <q-item-label caption>Última Actualización</q-item-label>
                   <q-item-label class="text-body1">{{
-                    formatDate(selectedTeam.updatedAt)
+                    formatDateForDisplay(selectedTeam.updatedAt)
                   }}</q-item-label>
                 </q-item-section>
               </q-item>
@@ -184,8 +184,8 @@
 </template>
 
 <script setup lang="ts">
-import { date } from 'quasar';
 import { Team } from 'src/modules/teams/domain/entities/team.entity';
+import { formatDateForDisplay } from 'src/modules/shared/utils/date.util';
 
 const props = defineProps({
   modelValue: {
@@ -197,11 +197,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-const formatDate = (dateString: Date) => {
-  if (!dateString) return 'No disponible';
-  return date.formatDate(dateString, 'DD/MM/YYYY HH:mm');
-};
 
 const emit = defineEmits(['update:modelValue', 'edit-team', 'delete-team']);
 
