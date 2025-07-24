@@ -145,7 +145,7 @@
                     <q-checkbox v-model="scrapingOptions.isQueensLeague" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Queens League</q-item-label>
+                    <q-item-label>Son jugadoras de Queens League</q-item-label>
                   </q-item-section>
                 </q-item>
               </div>
@@ -332,6 +332,7 @@ const resetScraping = () => {
     nameFilter: '',
     positionFilter: '',
     includeInactive: false,
+    isQueensLeague: false,
   };
 
   scrapingResult.itemsScraped = 0;

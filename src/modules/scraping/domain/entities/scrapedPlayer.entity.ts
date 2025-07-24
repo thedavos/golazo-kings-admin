@@ -11,8 +11,7 @@ export class ScrapedPlayer {
   public readonly imageUrl: string | undefined;
   public readonly referenceId: number | null;
   public readonly referenceUrl: string | null;
-
-  public slug: string;
+  public readonly slug: string;
 
   constructor(data: Partial<ScrapedPlayerDto>) {
     this.name = data.name;
@@ -24,8 +23,7 @@ export class ScrapedPlayer {
     this.imageUrl = data.imageUrl;
     this.referenceId = data.referenceId || null;
     this.referenceUrl = data.referenceUrl || null;
-
-    this.slug = this.generateSlugFromName();
+    this.slug = data.slug || this.generateSlugFromName();
   }
 
   public generateSlugFromName(): string {

@@ -12,6 +12,7 @@ export interface TeamDto {
   foundationYear: number | null;
   venue: string | null;
   leagueId: number | null;
+  isQueensLeagueTeam: boolean;
   createdAt: string;
   updatedAt: string;
 }

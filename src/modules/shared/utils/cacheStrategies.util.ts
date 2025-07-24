@@ -42,7 +42,7 @@ const CACHE_STRATEGIES: Record<
 
   // 🟡 Moderado - Listas de usuarios, equipos, proyectos
   moderate: {
-    staleTime: 0, // Siempre obsoleto
+    staleTime: TIME_CONSTANTS.MINUTE, // 1 minuto
     gcTime: 10 * TIME_CONSTANTS.MINUTE, // 10 minutos en cache
     description: 'Datos que cambian moderadamente',
   },

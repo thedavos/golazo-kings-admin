@@ -28,6 +28,7 @@ export class Team {
   public readonly foundationYear: number | null;
   public readonly venue: string | null;
   public readonly leagueId: number | null;
+  public readonly isQueensLeagueTeam: boolean;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
@@ -45,6 +46,7 @@ export class Team {
     venue: string | null;
     logoUrl: string | null;
     leagueId: number | null;
+    isQueensLeagueTeam: boolean;
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -61,6 +63,7 @@ export class Team {
     this.venue = data.city;
     this.logoUrl = data.logoUrl;
     this.leagueId = data.leagueId;
+    this.isQueensLeagueTeam = data.isQueensLeagueTeam;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }

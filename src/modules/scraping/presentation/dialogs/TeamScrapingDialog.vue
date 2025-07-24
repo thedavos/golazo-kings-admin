@@ -219,6 +219,14 @@
                         color="primary"
                       />
                     </div>
+
+                    <div class="col-12 q-mt-sm">
+                      <q-toggle
+                        v-model="scrapingOptions.isQueensLeague"
+                        label="Son equipos de Queens League"
+                        color="primary"
+                      />
+                    </div>
                   </div>
                 </q-card-section>
               </q-card>
@@ -372,6 +380,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useScraping } from 'src/modules/scraping/presentation/composables/useScraping.composable';
+import type { ScrapingOptions } from 'src/modules/scraping/presentation/composables/useScraping.composable';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 
 // Props
@@ -399,12 +408,13 @@ const leagueSearch = ref('');
 const scrapingCompleted = ref(false);
 const scrapingStatus = ref('');
 
-const scrapingOptions = ref({
+const scrapingOptions = ref<ScrapingOptions>({
   createMissing: true,
   updateExisting: true,
   preserveManualData: true,
   includeInactive: false,
   nameFilter: '',
+  isQueensLeague: false,
 });
 
 // Computed
@@ -481,6 +491,7 @@ const resetScraping = () => {
     updateExisting: true,
     preserveManualData: true,
     includeInactive: false,
+    isQueensLeague: false,
     nameFilter: '',
   };
 };

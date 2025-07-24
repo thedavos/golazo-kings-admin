@@ -24,6 +24,11 @@ export interface PlayerScrapingResult extends ScrapingResult {
   scrapedItems: ScrapedPlayer[];
 }
 
+export type PlayerScrapingProcessResult = Omit<
+  PlayerScrapingResult,
+  'type' | 'timestamp' | 'duration' | 'details'
+>;
+
 export interface TeamScrapingResult extends ScrapingResult {
   type: ScrapingType.TEAMS;
   scrapedItems: ScrapedTeam[];

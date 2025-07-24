@@ -35,6 +35,16 @@ export class PlayerService {
   }
 
   /**
+   * Obtener un jugador por su slug
+   * @param slug - Slug del jugador
+   * @returns Promise<Player>
+   */
+  async getPlayerBySlug(slug: string): Promise<Player> {
+    const response: ApiResponse<PlayerDto> = await this.apiClient.get(`/players/slug/${slug}`);
+    return PlayerMapper.fromDto(response.data);
+  }
+
+  /**
    * Crear un nuevo jugador
    * @param playerData - Datos del jugador a crear
    * @returns Promise<Player>
@@ -47,14 +57,15 @@ export class PlayerService {
   /**
    * Actualizar un jugador existente
    * @param id - ID del jugador a actualizar
+   * @param uuid - UUID del jugador a actualizar
    * @param playerData - Datos actualizados del jugador
    * @returns Promise<Player>
    */
-  async updatePlayer(id: number, playerData: UpdatePlayerDto): Promise<Player> {
-    const response: ApiResponse<PlayerDto> = await this.apiClient.patch(
-      `/players/${id}`,
-      playerData,
-    );
+  async updatePlayer(id: number, uuid: string, playerData: UpdatePlayerDto): Promise<Player> {
+    const response: ApiResponse<PlayerDto> = await this.apiClient.patch(`/players/${id}`, {
+      ...playerData,
+      uuid,
+    });
     return PlayerMapper.fromDto(response.data);
   }
 

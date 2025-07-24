@@ -23,7 +23,7 @@ export interface ScrapingOptions {
   positionFilter?: string;
   nameFilter?: string;
   includeInactive?: boolean;
-  isQueensLeague?: boolean;
+  isQueensLeague: boolean;
 }
 
 export function useScraping() {

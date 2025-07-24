@@ -19,6 +19,7 @@ export class TeamMapper {
       leagueId: dto.leagueId,
       referenceId: dto.referenceId,
       referenceUrl: dto.referenceUrl,
+      isQueensLeagueTeam: dto.isQueensLeagueTeam,
       createdAt: new Date(dto.createdAt),
       updatedAt: new Date(dto.updatedAt),
     });
@@ -44,6 +45,7 @@ export class TeamMapper {
       leagueId: team.leagueId,
       referenceId: team.referenceId,
       referenceUrl: team.referenceUrl,
+      isQueensLeagueTeam: team.isQueensLeagueTeam,
       createdAt: team.createdAt.toISOString(),
       updatedAt: team.updatedAt.toISOString(),
     };
@@ -68,6 +70,7 @@ export class TeamMapper {
       foundationYear: team.foundationYear || null,
       venue: team.venue || null,
       leagueId: team.leagueId || null,
+      isQueensLeagueTeam: team.isQueensLeagueTeam || false,
       referenceId: team.referenceId || null,
       referenceUrl: team.referenceUrl || null,
     };
@@ -90,6 +93,7 @@ export class TeamMapper {
     if (team.foundationYear !== null) updateDto.foundationYear = team.foundationYear;
     if (team.venue !== null) updateDto.venue = team.venue;
     if (team.leagueId !== null) updateDto.leagueId = team.leagueId;
+    if (team.isQueensLeagueTeam !== null) updateDto.isQueensLeagueTeam = team.isQueensLeagueTeam;
     if (team.referenceId !== null) updateDto.referenceId = team.referenceId;
     if (team.referenceUrl !== null) updateDto.referenceUrl = team.referenceUrl;
 
