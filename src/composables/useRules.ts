@@ -1,4 +1,5 @@
 import { computed } from 'vue';
+import { isValidUrl } from 'src/modules/shared/utils/isValidUrl.util';
 
 export const useRules = () => {
   const required =
@@ -12,10 +13,22 @@ export const useRules = () => {
   const maxLength = (max: number, message?: string) => (val: string) =>
     val.length <= max || message || `Must be at most ${max} characters`;
 
+  const between =
+    (min: number, max: number, message?: string) => (val: number | null | undefined) =>
+      val == null ||
+      (val >= min && val <= max) ||
+      message ||
+      `El valor debe estar entre ${min} y ${max}.`;
+
   const email =
     (message = 'Please enter a valid email') =>
     (val: string) =>
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || message;
+
+  const validUrl =
+    (message = 'Please enter a valid URL') =>
+    (val: string) =>
+      isValidUrl(val) || message;
 
   const passwordRules = {
     hasUppercase:
@@ -39,6 +52,35 @@ export const useRules = () => {
         /[^A-Za-z0-9]/.test(val) || message,
   };
 
+  const nameRules = computed(() => [
+    required('El nombre es requerido'),
+    minLength(3, 'Mínimo 3 caractéres'),
+    maxLength(100, 'Máximo 100 caractéres'),
+  ]);
+  const abbrRules = computed(() => [
+    required('La abreviación es requerida'),
+    maxLength(5, 'Máximo 5 caractéres'),
+  ]);
+  const cityRules = computed(() => [required('La ciudad es requerida')]);
+  const countryRules = computed(() => [required('El país es requerido')]);
+  const numberOfTeamsRules = computed(() => [
+    minLength(2, 'Mínimo 2 equipos'),
+    maxLength(64, 'Máximo 64 equipos'),
+  ]);
+  const statusRules = computed(() => [required('El estado es requerido')]);
+  const foundationYearRules = computed(() => {
+    const currentYear = new Date().getFullYear();
+
+    return [between(1800, currentYear, `Año entre 1800 y ${currentYear}`)];
+  });
+  const logoUrlRules = computed(() => [
+    required('URL del logo es requerida'),
+    validUrl('URL inválida'),
+  ]);
+  const websiteRules = computed(() => [
+    required('La website es requerida'),
+    (val: string) => isValidUrl(`https://${val}`) || 'URL inválida',
+  ]);
   const emailRules = computed(() => [required('Email is required'), email()]);
 
   const strongPasswordRules = computed(() => [
@@ -73,6 +115,16 @@ export const useRules = () => {
     numeric,
     phoneNumber,
     url,
+
+    nameRules,
+    abbrRules,
+    cityRules,
+    countryRules,
+    numberOfTeamsRules,
+    statusRules,
+    foundationYearRules,
+    logoUrlRules,
+    websiteRules,
 
     passwordRules,
 

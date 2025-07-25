@@ -197,11 +197,19 @@
       @submit="onCreateLeague"
       @close="onCloseCreateDialog"
     />
+
+    <edit-league-dialog
+      v-if="leagueToEdit"
+      :model-value="showEditDialog"
+      :league="leagueToEdit"
+      @close="onCloseEditDialog"
+      @saved="onLeagueSaved"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
@@ -212,6 +220,7 @@ import type { CreateLeagueDto } from 'src/modules/leagues/dtos/create-league.dto
 import LeagueStatCards from 'src/modules/leagues/presentation/components/LeagueStatCards.vue';
 import ViewLeagueDialog from 'src/modules/leagues/presentation/dialogs/ViewLeagueDialog.vue';
 import CreateLeagueDialog from 'src/modules/leagues/presentation/dialogs/CreateLeagueDialog.vue';
+import EditLeagueDialog from 'src/modules/leagues/presentation/dialogs/EditLeagueDialog.vue';
 
 const router = useRouter();
 const viewModel = useLeagueViewModel();
@@ -219,10 +228,11 @@ const viewModel = useLeagueViewModel();
 // Dialog states
 const showCreateDialog = ref(false);
 const showDetailsDialog = ref(false);
+const showEditDialog = ref(false);
 // const showDeleteDialog = ref(false);
 
 // Form state
-// const editingLeague = ref<League | null>(null);
+const leagueToEdit = ref<League | null>(null);
 // const leagueToDelete = ref<League | null>(null);
 const leagueToView = ref<League | null>(null);
 
@@ -301,6 +311,10 @@ const activeOptions = [
   { label: 'Inactiva', value: false },
 ];
 
+onMounted(async () => {
+  await viewModel.loadLeagues();
+});
+
 // Methods
 const viewLeague = (league: League) => {
   showDetailsDialog.value = true;
@@ -312,7 +326,8 @@ const viewLeagueTeams = async (league: League) => {
 };
 
 const editLeague = (league: League) => {
-  console.log('editLeague: ', league);
+  leagueToEdit.value = league;
+  showEditDialog.value = true;
 };
 
 const confirmDelete = (league: League) => {
@@ -344,5 +359,18 @@ const onCreateLeague = async (leagueData: CreateLeagueDto): Promise<void> => {
 
 const onCloseCreateDialog = (): void => {
   showCreateDialog.value = false;
+};
+
+const onCloseEditDialog = (): void => {
+  showEditDialog.value = false;
+  leagueToEdit.value = null;
+};
+
+const onLeagueSaved = async (): Promise<void> => {
+  // Actualizar la lista local si es necesario
+  showEditDialog.value = false;
+  leagueToEdit.value = null;
+  // Refresh data
+  await viewModel.loadLeagues();
 };
 </script>

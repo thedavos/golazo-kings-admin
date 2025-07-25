@@ -9,6 +9,7 @@ export interface LeagueDto {
   logoUrl: string | null;
   foundationYear: number | null;
   website: string | null;
+  venue: string | null;
   twitterHandle: string | null;
   instagramHandle: string | null;
   numberOfTeams: number;

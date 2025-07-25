@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import LeagueHeroSection from '../components/LeagueHeroSection.vue';
 import LeagueGeneralInfo from '../components/LeagueGeneralInfo.vue';
 import LeagueTeamsSection from '../components/LeagueTeamsSection.vue';
@@ -116,7 +116,7 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
-const $q = useQuasar();
+const notifications = useQuasarNotifications();
 
 // State
 const activeTab = ref('general');
@@ -142,66 +142,39 @@ const viewTeams = () => {
 };
 
 const addTeam = () => {
-  $q.notify({
-    message: 'Funcionalidad para agregar equipo pendiente de implementación',
-    color: 'info',
-  });
+  notifications.notifyInfo('Funcionalidad para agregar equipo pendiente de implementación');
 };
 
 const viewTeam = (teamId: number) => {
-  $q.notify({
-    message: `Ver equipo con ID: ${teamId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Ver equipo con ID: ${teamId}`);
 };
 
 const editTeam = (teamId: number) => {
-  $q.notify({
-    message: `Editar equipo con ID: ${teamId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Editar equipo con ID: ${teamId}`);
 };
 
 const removeTeam = (teamId: number) => {
-  $q.notify({
-    message: `Eliminar equipo con ID: ${teamId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Eliminar equipo con ID: ${teamId}`);
 };
 
 // Season actions
 const addSeason = () => {
-  $q.notify({
-    message: 'Funcionalidad para agregar temporada pendiente de implementación',
-    color: 'info',
-  });
+  notifications.notifyInfo('Funcionalidad para agregar temporada pendiente de implementación');
 };
 
 const viewSeason = (seasonId: number) => {
-  $q.notify({
-    message: `Ver temporada con ID: ${seasonId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Ver temporada con ID: ${seasonId}`);
 };
 
 const editSeason = (seasonId: number) => {
-  $q.notify({
-    message: `Editar temporada con ID: ${seasonId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Editar temporada con ID: ${seasonId}`);
 };
 
 const activateSeason = (seasonId: number) => {
-  $q.notify({
-    message: `Activar temporada con ID: ${seasonId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Activar temporada con ID: ${seasonId}`);
 };
 
 const deactivateSeason = (seasonId: number) => {
-  $q.notify({
-    message: `Desactivar temporada con ID: ${seasonId}`,
-    color: 'info',
-  });
+  notifications.notifyInfo(`Desactivar temporada con ID: ${seasonId}`);
 };
 </script>
