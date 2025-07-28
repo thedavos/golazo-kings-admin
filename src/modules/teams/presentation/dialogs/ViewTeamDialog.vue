@@ -78,7 +78,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
+import { useRouteQuery } from '@vueuse/router';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import TeamHeroSection from '../components/TeamHeroSection.vue';
 import TeamGeneralInfo from '../components/TeamGeneralInfo.vue';
@@ -102,9 +103,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 const notifications = useQuasarNotifications();
-
-// State
-const activeTab = ref('general');
+const activeTab = useRouteQuery<string>('tab', 'general');
 
 // Computed
 const isOpen = computed({

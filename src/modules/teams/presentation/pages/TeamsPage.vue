@@ -246,10 +246,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { LocationQuery, useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useRouteParams } from '@vueuse/router';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team.viewmodel';
+import type { LocationQuery } from 'vue-router';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
 
 // Import components
@@ -258,8 +260,9 @@ import ViewTeamDialog from '../dialogs/ViewTeamDialog.vue';
 import CreateTeamDialog from '../dialogs/CreateTeamDialog.vue';
 import EditTeamDialog from '../dialogs/EditTeamDialog.vue';
 
-const { params } = useRoute();
 const router = useRouter();
+const leagueId = useRouteParams('leagueId', '', { transform: Number });
+const teamSlug = useRouteParams('teamSlug', '');
 const notifications = useQuasarNotifications();
 const leagueViewModel = useLeagueViewModel();
 const {
@@ -282,9 +285,9 @@ router.beforeEach((to, from) => {
 });
 
 // Apply leagueId filter if provided in route params
-if (params.leagueId) {
+if (leagueId.value) {
   setFilters({
-    leagueId: Number(params.leagueId),
+    leagueId: leagueId.value,
   });
 }
 
@@ -307,10 +310,7 @@ watch(
   () => queensLeagueFilter.value,
   (newValue) => {
     if (newValue === null) {
-      // If filter is cleared, remove isQueensLeagueTeam from filters
-      // Use object destructuring with rest operator and ignore the removed property
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { isQueensLeagueTeam, ...restFilters } = filters.value;
+      const { ...restFilters } = filters.value;
       setFilters(restFilters);
     } else {
       // Otherwise, set the filter
@@ -334,7 +334,7 @@ const queensTeamOptions = computed(() => [
 ]);
 
 const loading = computed(() => loadings.value.any);
-const showFilters = computed(() => !params.leagueId);
+const showFilters = computed(() => !leagueId.value);
 
 // Stats
 const totalTeams = computed(() => teams.value.length);
@@ -418,7 +418,7 @@ function viewTeamPlayers(team: Team) {
 async function onCloseViewDialog() {
   showDetailsDialog.value = false;
   teamToView.value = null;
-  await router.push({ name: 'team-details' });
+  await router.push({ path: '/teams' });
 }
 
 // Edit team
@@ -441,7 +441,7 @@ function onCloseEditDialog() {
 
 function onTeamSaved() {
   notifications.notifySuccess('Equipo actualizado exitosamente');
-  void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+  void loadTeams();
   onCloseEditDialog();
 }
 
@@ -452,7 +452,7 @@ function onCloseCreateDialog() {
 
 function onTeamCreated(teamId: number) {
   notifications.notifySuccess(`Equipo creado exitosamente: ${teamId}`);
-  void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+  void loadTeams();
 }
 
 // Delete team
@@ -469,7 +469,7 @@ async function deleteTeam() {
     notifications.notifySuccess(`Equipo ${teamToDelete.value.name} eliminado exitosamente`);
     showDeleteDialog.value = false;
     teamToDelete.value = null;
-    void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+    void loadTeams();
   } catch (error) {
     notifications.notifyError('Error al eliminar el equipo');
     console.error('Error deleting team:', error);
@@ -481,8 +481,8 @@ onMounted(async () => {
   await loadTeams();
   await leagueViewModel.loadLeagues();
 
-  if (params.teamSlug) {
-    const team = getTeamBySlug(params.teamSlug as string);
+  if (teamSlug.value) {
+    const team = getTeamBySlug(teamSlug.value);
     if (team) await viewTeam(team);
   }
 });
