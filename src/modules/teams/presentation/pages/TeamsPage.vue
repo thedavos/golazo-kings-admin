@@ -427,10 +427,9 @@ function editTeam(team: Team) {
   showEditDialog.value = true;
 }
 
-async function onEditFromView() {
+function onEditFromView() {
   if (teamToView.value) {
     editTeam(teamToView.value);
-    await onCloseViewDialog();
   }
 }
 
