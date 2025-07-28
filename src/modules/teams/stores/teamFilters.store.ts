@@ -8,6 +8,7 @@ export interface TeamFilters {
   city?: SelectedItem | null;
   country?: SelectedItem | null;
   leagueId?: number | null;
+  isQueensLeagueTeam: boolean;
 }
 
 const DEFAULT_FILTERS: TeamFilters = {
@@ -15,6 +16,7 @@ const DEFAULT_FILTERS: TeamFilters = {
   city: null,
   country: null,
   leagueId: null,
+  isQueensLeagueTeam: false,
 };
 
 export const useTeamFiltersStore = defineStore('teamFilters', () => {

@@ -1,104 +1,166 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center justify-between q-mb-md">
+  <q-page padding>
+    <!-- Header -->
+    <div class="row items-center justify-between q-mb-lg">
       <div>
         <h4 class="text-h4 q-my-none">Equipos</h4>
-        <p class="text-grey-6 q-mb-none">Administra los equipos de la Kings League</p>
+        <p class="text-grey-6">Administra los equipos de todas las ligas</p>
       </div>
-      <q-btn color="primary" icon="add" label="Nuevo Equipo" @click="openCreateDialog" />
+      <q-btn color="primary" icon="add" label="Nuevo Equipo" @click="showCreateDialog = true" />
     </div>
 
-    <!-- Filtros -->
-    <q-card class="q-mb-md">
+    <!-- Stats Cards -->
+    <team-stat-cards
+      class="q-mb-lg"
+      :total-teams="totalTeams"
+      :active-teams="activeTeams"
+      :queens-teams="queensTeams"
+      :leagues="leaguesCount"
+    />
+
+    <!-- Filters -->
+    <q-card class="q-mb-lg">
       <q-card-section>
         <div class="row q-gutter-md">
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model="filters.search"
-              outlined
-              dense
-              placeholder="Buscar equipos..."
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
+          <q-input
+            v-model="filters.search"
+            label="Buscar equipo"
+            outlined
+            dense
+            class="col-md-3 col-sm-6 col-xs-12"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
 
-          <div v-if="showFilters" class="col-12 col-md-2">
-            <q-select
-              v-model="filters.city"
-              :options="cityOptions"
-              outlined
-              dense
-              clearable
-              label="Ciudad"
-            />
-          </div>
+          <q-select
+            v-if="showFilters"
+            v-model="filters.city"
+            :options="cityOptions"
+            label="Ciudad"
+            outlined
+            dense
+            clearable
+            class="col-md-2 col-sm-6 col-xs-12"
+          />
 
-          <div v-if="showFilters" class="col-12 col-md-2">
-            <q-select
-              v-model="filters.country"
-              :options="countryOptions"
-              outlined
-              dense
-              clearable
-              label="País"
-            />
-          </div>
+          <q-select
+            v-if="showFilters"
+            v-model="filters.country"
+            :options="countryOptions"
+            label="País"
+            outlined
+            dense
+            clearable
+            class="col-md-2 col-sm-6 col-xs-12"
+          />
 
-          <div v-if="showFilters" class="col-12 col-md-2">
-            <q-select
-              v-model="filters.leagueId"
-              :options="leagueOptions"
-              outlined
-              dense
-              clearable
-              label="Liga"
-              option-label="name"
-              option-value="id"
-              emit-value
-              map-options
-            />
-          </div>
+          <q-select
+            v-if="showFilters"
+            v-model="filters.leagueId"
+            :options="leagueOptions"
+            label="Liga"
+            outlined
+            dense
+            clearable
+            option-label="name"
+            option-value="id"
+            emit-value
+            map-options
+            class="col-md-2 col-sm-6 col-xs-12"
+          />
 
-          <div class="col-12 col-md-2">
-            <q-btn outline color="grey-7" icon="clear" label="Limpiar" @click="clearAllFilters" />
-          </div>
+          <q-select
+            v-model="queensLeagueFilter"
+            :options="queensTeamOptions"
+            label="Tipo"
+            outlined
+            dense
+            clearable
+            class="col-md-2 col-sm-6 col-xs-12"
+          />
+
+          <q-btn
+            color="grey-6"
+            flat
+            icon="clear"
+            label="Limpiar filtros"
+            @click="clearAllFilters"
+            class="col-auto"
+          />
         </div>
       </q-card-section>
     </q-card>
 
-    <!-- Tabla de Equipos -->
+    <!-- Teams Table -->
     <q-card>
-      <q-table :rows="teams" :columns="columns" :loading="loading" row-key="id">
+      <q-table
+        :rows="teams"
+        :columns="columns"
+        :loading="loading"
+        row-key="id"
+        :pagination="{ rowsPerPage: 10 }"
+        flat
+        bordered
+      >
+        <!-- Logo column -->
         <template v-slot:body-cell-logo="props">
           <q-td :props="props">
-            <q-avatar size="40px">
-              <img :src="props.value" :alt="props.row.name" />
+            <q-avatar v-if="props.row.logoUrl" size="40px">
+              <img :src="props.row.logoUrl" :alt="props.row.name" />
             </q-avatar>
+            <q-avatar v-else color="grey-4" text-color="grey-8" icon="sports_soccer" size="40px" />
           </q-td>
         </template>
 
-        <template v-slot:body-cell-name="props">
+        <!-- Team info column -->
+        <template v-slot:body-cell-team="props">
           <q-td :props="props">
             <div>
-              <div class="text-weight-medium">{{ props.row.name }}</div>
-              <div class="text-caption text-grey-6">{{ props.row.slug }}</div>
+              <div class="text-weight-bold">{{ props.row.name }}</div>
+              <div class="text-grey-6 text-caption">{{ props.row.abbr || 'Sin abreviación' }}</div>
             </div>
           </q-td>
         </template>
 
+        <!-- League column -->
+        <template v-slot:body-cell-league="props">
+          <q-td :props="props">
+            <q-chip
+              v-if="props.row.leagueId"
+              color="info"
+              text-color="white"
+              :label="getLeagueName(props.row.leagueId)"
+              size="sm"
+            />
+            <span v-else class="text-grey-6">Sin liga</span>
+          </q-td>
+        </template>
+
+        <!-- Location column -->
         <template v-slot:body-cell-location="props">
           <q-td :props="props">
             <div>
               <div>{{ props.row.city }}</div>
-              <div class="text-caption text-grey-6">{{ props.row.country }}</div>
+              <div class="text-grey-6 text-caption">{{ props.row.country }}</div>
             </div>
           </q-td>
         </template>
 
+        <!-- Type column -->
+        <template v-slot:body-cell-type="props">
+          <q-td :props="props">
+            <q-chip
+              :color="props.row.isQueensLeagueTeam ? 'pink' : 'primary'"
+              text-color="white"
+              :label="props.row.isQueensLeagueTeam ? 'Queens League' : 'Kings League'"
+              size="sm"
+            />
+          </q-td>
+        </template>
+
+        <!-- Actions column -->
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <q-btn-dropdown flat dense rounded no-icon-animation dropdown-icon="more_vert">
@@ -108,14 +170,20 @@
                     <q-item-label>Ver detalles</q-item-label>
                   </q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup @click="viewTeamPlayers(props.row)">
+                  <q-item-section>
+                    <q-item-label>Ver jugadores</q-item-label>
+                  </q-item-section>
+                </q-item>
                 <q-item clickable v-close-popup @click="editTeam(props.row)">
                   <q-item-section>
                     <q-item-label>Editar</q-item-label>
                   </q-item-section>
                 </q-item>
-                <q-item clickable v-close-popup>
+                <q-separator />
+                <q-item clickable v-close-popup @click="confirmDelete(props.row)">
                   <q-item-section>
-                    <q-item-label>Eliminar</q-item-label>
+                    <q-item-label class="text-negative">Eliminar</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -125,24 +193,74 @@
       </q-table>
     </q-card>
 
-    <TeamDetailDialog
-      v-if="selectedTeam"
-      v-model="showDetailDialog"
-      :selected-team="selectedTeam"
+    <!-- Dialogs -->
+    <view-team-dialog
+      v-if="teamToView"
+      :model-value="showDetailsDialog"
+      :view-team="teamToView"
+      @close="onCloseViewDialog"
+      @edit="onEditFromView"
     />
+
+    <create-team-dialog
+      :model-value="showCreateDialog"
+      @close="onCloseCreateDialog"
+      @created="onTeamCreated"
+    />
+
+    <edit-team-dialog
+      v-if="teamToEdit"
+      :model-value="showEditDialog"
+      :team="teamToEdit"
+      @close="onCloseEditDialog"
+      @saved="onTeamSaved"
+    />
+
+    <!-- Delete Confirmation -->
+    <q-dialog v-model="showDeleteDialog" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm text-h6">Confirmar eliminación</span>
+        </q-card-section>
+
+        <q-card-section>
+          <p>
+            ¿Estás seguro de que quieres eliminar el equipo
+            <strong>{{ teamToDelete?.name }}</strong
+            >?
+          </p>
+          <p class="text-caption text-grey-6">
+            Esta acción no se puede deshacer y eliminará todos los datos relacionados.
+          </p>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" @click="showDeleteDialog = false" />
+          <q-btn color="negative" label="Eliminar" :loading="loadings.delete" @click="deleteTeam" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { LocationQuery, useRoute, useRouter } from 'vue-router';
+import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { useTeamViewModel } from 'src/modules/teams/presentation/viewmodels/team.viewmodel';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
 
-import TeamDetailDialog from 'src/modules/teams/presentation/dialogs/TeamDetailDialog.vue';
+// Import components
+import TeamStatCards from '../components/TeamStatCards.vue';
+import ViewTeamDialog from '../dialogs/ViewTeamDialog.vue';
+import CreateTeamDialog from '../dialogs/CreateTeamDialog.vue';
+import EditTeamDialog from '../dialogs/EditTeamDialog.vue';
 
 const { params } = useRoute();
+const router = useRouter();
+const notifications = useQuasarNotifications();
 const leagueViewModel = useLeagueViewModel();
 const {
   cities,
@@ -152,31 +270,82 @@ const {
   filters,
   setFilters,
   clearFilters,
-  selectedTeam,
-  selectTeam,
-  clearSelection,
+  loadTeams,
+  getTeamBySlug,
+  deleteTeam: deleteTeamAction,
 } = useTeamViewModel();
 
-// State
-const showFormDialog = ref(false);
-const showDetailDialog = ref(false);
-const dialogMode = ref<'create' | 'edit'>('create');
+router.beforeEach((to, from) => {
+  if (to.path === '/teams' && from.params.teamSlug) {
+    showDetailsDialog.value = false;
+  }
+});
 
+// Apply leagueId filter if provided in route params
 if (params.leagueId) {
   setFilters({
     leagueId: Number(params.leagueId),
   });
 }
 
+// Dialog states
+const showCreateDialog = ref(false);
+const showDetailsDialog = ref(false);
+const showEditDialog = ref(false);
+const showDeleteDialog = ref(false);
+
+// Team states
+const teamToView = ref<Team | null>(null);
+const teamToEdit = ref<Team | null>(null);
+const teamToDelete = ref<Team | null>(null);
+
+// Queens League filter
+const queensLeagueFilter = ref<{ label: string; value: boolean } | null>(null);
+
+// Watch for changes in queensLeagueFilter
+watch(
+  () => queensLeagueFilter.value,
+  (newValue) => {
+    if (newValue === null) {
+      // If filter is cleared, remove isQueensLeagueTeam from filters
+      // Use object destructuring with rest operator and ignore the removed property
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { isQueensLeagueTeam, ...restFilters } = filters.value;
+      setFilters(restFilters);
+    } else {
+      // Otherwise, set the filter
+      setFilters({ isQueensLeagueTeam: newValue.value });
+    }
+  },
+);
+
 // Computed
 const cityOptions = computed(() => cities.value.map((city) => ({ label: city, value: city })));
+
 const countryOptions = computed(() =>
   countries.value.map((country) => ({ label: country, value: country })),
 );
+
 const leagueOptions = computed(() => leagueViewModel.leagues.value);
+
+const queensTeamOptions = computed(() => [
+  { label: 'Queens League', value: true },
+  { label: 'Kings League', value: false },
+]);
+
 const loading = computed(() => loadings.value.any);
 const showFilters = computed(() => !params.leagueId);
 
+// Stats
+const totalTeams = computed(() => teams.value.length);
+const activeTeams = computed(() => teams.value.filter((team) => team.leagueId !== null).length);
+const queensTeams = computed(() => teams.value.filter((team) => team.isQueensLeagueTeam).length);
+const leaguesCount = computed(() => {
+  const uniqueLeagueIds = new Set(teams.value.map((team) => team.leagueId).filter(Boolean));
+  return uniqueLeagueIds.size;
+});
+
+// Table columns
 const columns = [
   {
     name: 'logo',
@@ -186,16 +355,16 @@ const columns = [
     sortable: false,
   },
   {
-    name: 'name',
-    label: 'Nombre',
+    name: 'team',
+    label: 'Equipo',
     field: 'name',
     align: 'left' as const,
     sortable: true,
   },
   {
-    name: 'abbr',
-    label: 'Abrev.',
-    field: 'abbr',
+    name: 'league',
+    label: 'Liga',
+    field: 'leagueId',
     align: 'center' as const,
     sortable: true,
   },
@@ -207,9 +376,9 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'foundationYear',
-    label: 'Fundación',
-    field: 'foundationYear',
+    name: 'type',
+    label: 'Tipo',
+    field: 'isQueensLeagueTeam',
     align: 'center' as const,
     sortable: true,
   },
@@ -225,27 +394,96 @@ const columns = [
 // Methods
 function clearAllFilters() {
   clearFilters();
+  queensLeagueFilter.value = null;
 }
 
-function openCreateDialog() {
-  clearSelection();
-  dialogMode.value = 'create';
-  showFormDialog.value = true;
+function getLeagueName(leagueId: number): string {
+  const league = leagueViewModel.leagues.value.find((l) => l.id === leagueId);
+  return league ? league.name : `Liga ${leagueId}`;
 }
 
-function viewTeam(team: Team) {
-  selectTeam(team);
-  showDetailDialog.value = true;
+// View team
+async function viewTeam(team: Team, query: LocationQuery = {}) {
+  teamToView.value = team;
+  await router.push({ name: 'team-details', params: { teamSlug: team.slug }, query });
+  showDetailsDialog.value = true;
 }
 
+function viewTeamPlayers(team: Team) {
+  void viewTeam(team, {
+    tab: 'players',
+  } as LocationQuery);
+}
+
+async function onCloseViewDialog() {
+  showDetailsDialog.value = false;
+  teamToView.value = null;
+  await router.push({ name: 'team-details' });
+}
+
+// Edit team
 function editTeam(team: Team) {
-  selectTeam(team);
-  dialogMode.value = 'edit';
-  showFormDialog.value = true;
+  teamToEdit.value = team;
+  showEditDialog.value = true;
 }
 
-// function onTeamSaved() {
-//   showFormDialog.value = false;
-//   selectedTeam.value = null;
-// }
+async function onEditFromView() {
+  if (teamToView.value) {
+    editTeam(teamToView.value);
+    await onCloseViewDialog();
+  }
+}
+
+function onCloseEditDialog() {
+  showEditDialog.value = false;
+  teamToEdit.value = null;
+}
+
+function onTeamSaved() {
+  notifications.notifySuccess('Equipo actualizado exitosamente');
+  void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+  onCloseEditDialog();
+}
+
+// Create team
+function onCloseCreateDialog() {
+  showCreateDialog.value = false;
+}
+
+function onTeamCreated(teamId: number) {
+  notifications.notifySuccess(`Equipo creado exitosamente: ${teamId}`);
+  void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+}
+
+// Delete team
+function confirmDelete(team: Team) {
+  teamToDelete.value = team;
+  showDeleteDialog.value = true;
+}
+
+async function deleteTeam() {
+  if (!teamToDelete.value) return;
+
+  try {
+    await deleteTeamAction();
+    notifications.notifySuccess(`Equipo ${teamToDelete.value.name} eliminado exitosamente`);
+    showDeleteDialog.value = false;
+    teamToDelete.value = null;
+    void loadTeams(); // Use void operator to explicitly mark the promise as ignored
+  } catch (error) {
+    notifications.notifyError('Error al eliminar el equipo');
+    console.error('Error deleting team:', error);
+  }
+}
+
+// Load data
+onMounted(async () => {
+  await loadTeams();
+  await leagueViewModel.loadLeagues();
+
+  if (params.teamSlug) {
+    const team = getTeamBySlug(params.teamSlug as string);
+    if (team) await viewTeam(team);
+  }
+});
 </script>

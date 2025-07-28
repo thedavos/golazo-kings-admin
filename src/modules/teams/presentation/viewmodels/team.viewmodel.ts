@@ -67,6 +67,7 @@ export function useTeamViewModel() {
     loadTeams: () => teamListStore.refetch(),
     setFilters: teamFiltersStore.setFilters,
     clearFilters: teamFiltersStore.clearFilters,
+    getTeamBySlug: teamListStore.getTeamBySlug,
     getTeamById: teamDetailsStore.fetchTeam,
     createTeam: teamDetailsStore.createTeam,
     updateTeam: teamDetailsStore.updateTeam,

@@ -72,8 +72,8 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
   });
 
   const updateMutation = useMutation({
-    mutation: ({ id, teamData }: { id: number; teamData: UpdateTeamDto }) =>
-      teamService.updateTeam(id, teamData),
+    mutation: ({ id, uuid, teamData }: { id: number; uuid: string; teamData: UpdateTeamDto }) =>
+      teamService.updateTeam(id, uuid, teamData),
     async onSuccess(updatedTeam) {
       notifications.notifySuccess('Equipo actualizado exitosamente');
       await invalidateTeamCaches(updatedTeam.id);
@@ -125,13 +125,14 @@ export const useTeamDetailsStore = defineStore('teamDetails', () => {
     return newTeam;
   };
 
-  const updateTeam = async (teamData: UpdateTeamDto) => {
+  const updateTeam = async (uuid: string, teamData: UpdateTeamDto) => {
     if (!selectedTeamId.value) {
       throw new Error('No hay equipo seleccionado para actualizar');
     }
 
     return updateMutation.mutateAsync({
       id: selectedTeamId.value,
+      uuid,
       teamData,
     });
   };

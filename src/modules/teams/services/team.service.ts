@@ -38,8 +38,11 @@ export class TeamService {
     return TeamMapper.fromDto(response.data);
   }
 
-  async updateTeam(id: number, teamData: UpdateTeamDto): Promise<Team> {
-    const response: ApiResponse<TeamDto> = await this.apiClient.put(`/teams/${id}`, teamData);
+  async updateTeam(id: number, uuid: string, teamData: UpdateTeamDto): Promise<Team> {
+    const response: ApiResponse<TeamDto> = await this.apiClient.put(`/teams/${id}`, {
+      ...teamData,
+      uuid,
+    });
     return TeamMapper.fromDto(response.data);
   }
 

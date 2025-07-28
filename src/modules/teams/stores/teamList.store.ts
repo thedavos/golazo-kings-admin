@@ -77,6 +77,10 @@ export const useTeamListStore = defineStore('teamList', () => {
   const hasResults = computed(() => totalTeams.value > 0);
   const isEmpty = computed(() => !isLoading.value && totalTeams.value === 0);
 
+  const getTeamBySlug = (slug: string) => {
+    return allTeams.value.find((team) => team.slug === slug);
+  };
+
   return {
     teams,
     isLoading,
@@ -87,5 +91,7 @@ export const useTeamListStore = defineStore('teamList', () => {
     hasResults,
     isEmpty,
     refetch,
+
+    getTeamBySlug,
   };
 });

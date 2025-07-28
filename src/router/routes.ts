@@ -6,6 +6,13 @@ const addAuthMeta = () => ({
   },
 });
 
+const addDashboardRoute = (path: string) => ({
+  path,
+  component: () => import('layouts/MainLayout.vue'),
+  children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+  ...addAuthMeta(),
+});
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -14,13 +21,8 @@ const routes: RouteRecordRaw[] = [
       { path: '', component: () => import('src/modules/auth/presentation/pages/LoginPage.vue') },
     ],
   },
-
-  {
-    path: '/dashboard',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
-    ...addAuthMeta(),
-  },
+  addDashboardRoute('/'),
+  addDashboardRoute('/dashboard'),
 
   {
     path: '/leagues',
@@ -42,6 +44,11 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
+        component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
+      },
+      {
+        name: 'team-details',
+        path: ':teamSlug',
         component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
       },
     ],
