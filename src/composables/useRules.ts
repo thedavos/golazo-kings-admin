@@ -57,6 +57,14 @@ export const useRules = () => {
     minLength(3, 'Mínimo 3 caractéres'),
     maxLength(100, 'Máximo 100 caractéres'),
   ]);
+  const firstNameRules = computed(() => [
+    required('El nombre es requerido'),
+    minLength(2, 'El nombre debe tener al menos 2 caracteres'),
+  ]);
+  const lastNameRules = computed(() => [
+    required('El apellido es requerido'),
+    minLength(2, 'El apellido debe tener al menos 2 caracteres'),
+  ]);
   const abbrRules = computed(() => [
     required('La abreviación es requerida'),
     maxLength(5, 'Máximo 5 caractéres'),
@@ -117,6 +125,8 @@ export const useRules = () => {
     url,
 
     nameRules,
+    firstNameRules,
+    lastNameRules,
     abbrRules,
     cityRules,
     countryRules,

@@ -81,6 +81,10 @@ export const useTeamListStore = defineStore('teamList', () => {
     return allTeams.value.find((team) => team.slug === slug);
   };
 
+  const getTeamByUuid = (uuid: string) => {
+    return allTeams.value.find((team) => team.uuid === uuid);
+  };
+
   return {
     teams,
     isLoading,
@@ -92,6 +96,7 @@ export const useTeamListStore = defineStore('teamList', () => {
     isEmpty,
     refetch,
 
+    getTeamByUuid,
     getTeamBySlug,
   };
 });

@@ -43,12 +43,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: '',
+        name: 'team-details-by-uuid',
+        path: ':uuid?',
         component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
       },
       {
         name: 'team-details',
-        path: ':teamSlug',
+        path: 'slug/:teamSlug',
         component: () => import('src/modules/teams/presentation/pages/TeamsPage.vue'),
       },
     ],
@@ -59,6 +60,23 @@ const routes: RouteRecordRaw[] = [
     path: '/scraping',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/ScrapingPage.vue') }],
+    ...addAuthMeta(),
+  },
+
+  {
+    path: '/players',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('src/modules/players/presentation/pages/PlayersPage.vue'),
+      },
+      {
+        name: 'player-details',
+        path: ':playerSlug',
+        component: () => import('src/modules/players/presentation/pages/PlayersPage.vue'),
+      },
+    ],
     ...addAuthMeta(),
   },
 

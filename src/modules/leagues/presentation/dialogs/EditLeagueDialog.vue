@@ -255,6 +255,7 @@ import { useRules } from 'src/composables/useRules';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
 import { LeagueStatus } from 'src/modules/leagues/domain/enums/league-status.enum';
 import { isValidUrl } from 'src/modules/shared/utils/isValidUrl.util';
+import { objectComparer } from 'src/modules/shared/utils/objectComparer.util';
 import type { League } from 'src/modules/leagues/domain/entities/league.entity';
 import type { UpdateLeagueDto } from 'src/modules/leagues/dtos/update-league.dto';
 
@@ -331,7 +332,7 @@ const statusOptions = [
 
 // Computed properties
 const hasChanges = computed(() => {
-  return JSON.stringify(form) !== JSON.stringify(originalData.value);
+  return objectComparer.compare(form, originalData.value);
 });
 
 const isFormValid = computed(() => {

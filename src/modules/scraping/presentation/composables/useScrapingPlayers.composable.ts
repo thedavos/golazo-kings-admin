@@ -43,6 +43,7 @@ export function useScrapingPlayers() {
     );
 
     const createPlayerDto: CreatePlayerDto = {
+      isActive: true,
       firstName: scrapedPlayer.firstName!,
       lastName: scrapedPlayer.lastName!,
       isWildCard: scrapedPlayer.isWildCard!,

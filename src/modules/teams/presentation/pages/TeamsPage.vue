@@ -263,6 +263,7 @@ import EditTeamDialog from '../dialogs/EditTeamDialog.vue';
 const router = useRouter();
 const leagueId = useRouteParams('leagueId', '', { transform: Number });
 const teamSlug = useRouteParams('teamSlug', '');
+const teamUuid = useRouteParams('uuid', '');
 const notifications = useQuasarNotifications();
 const leagueViewModel = useLeagueViewModel();
 const {
@@ -275,11 +276,12 @@ const {
   clearFilters,
   loadTeams,
   getTeamBySlug,
+  getTeamByUuid,
   deleteTeam: deleteTeamAction,
 } = useTeamViewModel();
 
 router.beforeEach((to, from) => {
-  if (to.path === '/teams' && from.params.teamSlug) {
+  if (to.path === '/teams' && (from.params.teamSlug || from.params.uuid)) {
     showDetailsDialog.value = false;
   }
 });
@@ -405,7 +407,24 @@ function getLeagueName(leagueId: number): string {
 // View team
 async function viewTeam(team: Team, query: LocationQuery = {}) {
   teamToView.value = team;
-  await router.push({ name: 'team-details', params: { teamSlug: team.slug }, query });
+
+  if (teamUuid.value) {
+    await router.push({
+      name: 'team-details-by-uuid',
+      params: {
+        uuid: team.uuid,
+      },
+    });
+  } else {
+    await router.push({
+      name: 'team-details',
+      params: {
+        teamSlug: team.slug,
+      },
+      query,
+    });
+  }
+
   showDetailsDialog.value = true;
 }
 
@@ -480,9 +499,15 @@ onMounted(async () => {
   await loadTeams();
   await leagueViewModel.loadLeagues();
 
+  if (teamUuid.value) {
+    const team = getTeamByUuid(teamUuid.value);
+    if (team) void viewTeam(team);
+    return;
+  }
+
   if (teamSlug.value) {
     const team = getTeamBySlug(teamSlug.value);
-    if (team) await viewTeam(team);
+    if (team) void viewTeam(team);
   }
 });
 </script>

@@ -66,6 +66,7 @@ export class PlayerService {
       ...playerData,
       uuid,
     });
+
     return PlayerMapper.fromDto(response.data);
   }
 

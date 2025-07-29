@@ -2,11 +2,12 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRules } from 'src/composables/useRules';
 import { useQuasarNotifications } from 'src/composables/useQuasarNotifications';
+import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 import { isValidUrl } from 'src/modules/shared/utils/isValidUrl.util';
 import { ValidationUtils } from 'src/modules/shared/utils/validation.util';
+import { objectComparer } from 'src/modules/shared/utils/objectComparer.util';
 import type { CreateTeamDto } from 'src/modules/teams/dtos/create-team.dto';
 import type { Team } from 'src/modules/teams/domain/entities/team.entity';
-import { useLeagueViewModel } from 'src/modules/leagues/presentation/viewmodels/league.viewmodel';
 
 interface UseTeamFormOptions {
   initialData?: Partial<Team>;
@@ -65,7 +66,7 @@ export function useTeamForm(options: UseTeamFormOptions) {
 
   const hasChanges = computed(() => {
     if (mode === 'create') return true;
-    return JSON.stringify(form) !== JSON.stringify(originalFormData.value);
+    return objectComparer.compare(form, originalFormData.value).hasChanges;
   });
 
   // Auto-generate slug from name
