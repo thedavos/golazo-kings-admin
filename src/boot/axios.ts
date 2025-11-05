@@ -16,7 +16,7 @@ declare module 'vue' {
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:3000',
+  baseURL: process.env.API_URL || 'https://api.golazokings.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
